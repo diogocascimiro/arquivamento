@@ -145,8 +145,6 @@ table.s{border-collapse:collapse;width:100%;font-size:12.5px;margin-bottom:24px;
 
 <div class="tools" id="tools">
   <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="text" placeholder="Buscar proposição, autor, situação…" autocomplete="off"></div>
-  <span class="lbl">Arquiva?</span>
-  <div class="seg" id="fArq"><button data-v="" class="on">Todas</button><button data-v="SIM">Sim</button><button data-v="NÃO">Não</button><button data-v="VERIFICAR">Verificar</button></div>
   <span class="lbl">Implantação</span>
   <div class="seg" id="fImp"><button data-v="" class="on">Todas</button><button data-v="pend">Pendentes</button><button data-v="feita">Feitas</button><button data-v="mine">Minhas</button></div>
   <div class="chips" id="chips"></div>
@@ -348,10 +346,14 @@ function filtrar(lista, aba){
     return true;
   });
 }
+// A lista é só o que vai para o arquivo (ou precisa de verificação). O que fica tramitando não aparece.
+// Itens que só existem no Silegis (ex.: mensagens de 1995–2004 ainda "Recebida") ficam na aba PORTAL × SILEGIS.
+const naLista = x => x.dec.d!=="NÃO" || !!x.dec.man;
+const listaBase = () => ITENS.filter(x=>naLista(x) && x.cruz!=="Só no Silegis");
 function listaDaAba(aba){
   if (aba==="VER") return ITENS.filter(x=>x.dec.d==="VERIFICAR" || (x.dec.man && x.ver));
-  if (aba==="DIV") return ITENS.filter(x=>x.cruz!=="OK");
-  return ITENS.filter(x=>x.aba===aba);
+  if (aba==="DIV") return ITENS.filter(x=>naLista(x) && x.cruz!=="OK");
+  return listaBase().filter(x=>x.aba===aba);
 }
 
 /* ---------- Grade virtualizada ---------- */
@@ -450,29 +452,30 @@ function popDep(el, nome){
 function renderResumo(){
   const tipos = [...new Set(ITENS.map(x=>x.aba))];
   const ordem = ABAS.filter(a=>a.id && (TIPOS_ABA.has(a.id)||a.id==="OUTROS")).map(a=>a.id).filter(id=>tipos.includes(id));
+  const BASE = listaBase();
   const linha = lista => { const arq=lista.filter(x=>x.dec.d==="SIM"); const imp=arq.filter(x=>quemCell(x,"imp")).length; const conf=arq.filter(x=>quemCell(x,"conf")).length; const rec=arq.filter(x=>marca(x.k,"rec")==="SIM").length;
-    return {n:lista.length, arq:arq.length, nao:lista.filter(x=>x.dec.d==="NÃO").length, ver:lista.filter(x=>x.dec.d==="VERIFICAR").length, imp, conf, rec}; };
-  const tot = linha(ITENS);
-  const porPessoa = new Map(); for (const x of ITENS){ const q=quemCell(x,"imp"); if(q) porPessoa.set(q,(porPessoa.get(q)||0)+1); }
-  const porConf = new Map(); for (const x of ITENS){ const q=quemCell(x,"conf"); if(q) porConf.set(q,(porConf.get(q)||0)+1); }
-  const div = ITENS.filter(x=>x.cruz!=="OK"); const dc = c => div.filter(x=>x.cruz===c).length;
+    return {n:lista.length, arq:arq.length, ver:lista.filter(x=>x.dec.d==="VERIFICAR").length, imp, conf, rec}; };
+  const tot = linha(BASE);
+  const porPessoa = new Map(); for (const x of BASE){ const q=quemCell(x,"imp"); if(q) porPessoa.set(q,(porPessoa.get(q)||0)+1); }
+  const porConf = new Map(); for (const x of BASE){ const q=quemCell(x,"conf"); if(q) porConf.set(q,(porConf.get(q)||0)+1); }
+  const div = ITENS.filter(x=>naLista(x) && x.cruz!=="OK"); const dc = c => div.filter(x=>x.cruz===c).length;
+  const fica = ITENS.filter(x=>!naLista(x)).length;
   const pct = (a,b) => b ? Math.round(a/b*100) : 0;
   const bm = bookmarklet();
   $("#count").innerHTML = "";
   $("#sheet").innerHTML = `<div class="wrap">
     <h2>Arquivamento ao final da 20ª Legislatura</h2>
-    <p class="sub">Proposições em tramitação no portal e no Silegis, com a regra do art. 180 do Regimento Interno e da DNP 26/2018 aplicada a cada uma. Fim da legislatura: 31/01/2027.</p>
+    <p class="sub">Proposições que vão para o arquivo em 31/01/2027, pela regra do art. 180 do Regimento Interno e da DNP 26/2018. Das ${ITENS.length.toLocaleString("pt-BR")} em tramitação, ${fica.toLocaleString("pt-BR")} continuam na próxima legislatura e não entram na lista.</p>
     <div class="cards">
-      <div class="kpi"><div class="v">${tot.n.toLocaleString("pt-BR")}</div><div class="l">Em tramitação</div></div>
       <div class="kpi red"><div class="v">${tot.arq.toLocaleString("pt-BR")}</div><div class="l">A arquivar</div></div>
-      <div class="kpi green"><div class="v">${tot.nao.toLocaleString("pt-BR")}</div><div class="l">Não arquivam</div></div>
       <div class="kpi amber"><div class="v">${tot.ver.toLocaleString("pt-BR")}</div><div class="l">A verificar</div></div>
       <div class="kpi"><div class="v">${pct(tot.imp,tot.arq)}%</div><div class="l">Implantados (${tot.imp.toLocaleString("pt-BR")})</div></div>
       <div class="kpi"><div class="v">${pct(tot.conf,tot.arq)}%</div><div class="l">Conferidos (${tot.conf.toLocaleString("pt-BR")})</div></div>
+      <div class="kpi green"><div class="v">${pct(tot.rec,tot.arq)}%</div><div class="l">Recolhidos (${tot.rec.toLocaleString("pt-BR")})</div></div>
     </div>
-    <table class="s"><thead><tr><th>Tipo</th><th>Em tramitação</th><th>A arquivar</th><th>Não arquivam</th><th>Verificar</th><th>Implantados</th><th>Conferidos</th><th>Recolhidos</th><th style="width:140px">Progresso</th></tr></thead><tbody>
-      ${ordem.map(id=>{ const l=linha(ITENS.filter(x=>x.aba===id)); return `<tr><td><a data-go="${id}">${id}</a></td><td>${l.n}</td><td><a data-go="${id}" data-farq="SIM">${l.arq}</a></td><td>${l.nao}</td><td>${l.ver?`<a data-go="${id}" data-farq="VERIFICAR">${l.ver}</a>`:0}</td><td>${l.imp}</td><td>${l.conf}</td><td>${l.rec}</td><td><div class="bar2"><i style="width:${pct(l.imp,l.arq)}%"></i></div></td></tr>`; }).join("")}
-      <tr class="tot"><td>TOTAL</td><td>${tot.n}</td><td>${tot.arq}</td><td>${tot.nao}</td><td>${tot.ver}</td><td>${tot.imp}</td><td>${tot.conf}</td><td>${tot.rec}</td><td><div class="bar2"><i style="width:${pct(tot.imp,tot.arq)}%"></i></div></td></tr>
+    <table class="s"><thead><tr><th>Tipo</th><th>A arquivar</th><th>Verificar</th><th>Implantados</th><th>Conferidos</th><th>Recolhidos</th><th style="width:140px">Progresso</th></tr></thead><tbody>
+      ${ordem.map(id=>{ const l=linha(BASE.filter(x=>x.aba===id)); if(!l.n) return ""; return `<tr><td><a data-go="${id}">${id}</a></td><td><a data-go="${id}">${l.arq.toLocaleString("pt-BR")}</a></td><td>${l.ver?`<a data-go="VER">${l.ver}</a>`:0}</td><td>${l.imp}</td><td>${l.conf}</td><td>${l.rec}</td><td><div class="bar2"><i style="width:${pct(l.imp,l.arq)}%"></i></div></td></tr>`; }).join("")}
+      <tr class="tot"><td>TOTAL</td><td>${tot.arq.toLocaleString("pt-BR")}</td><td>${tot.ver}</td><td>${tot.imp}</td><td>${tot.conf}</td><td>${tot.rec}</td><td><div class="bar2"><i style="width:${pct(tot.imp,tot.arq)}%"></i></div></td></tr>
     </tbody></table>
     <div class="cols2">
       <div>
@@ -482,7 +485,7 @@ function renderResumo(){
         <table class="s"><thead><tr><th>Conferência</th><th>Proposições</th></tr></thead><tbody>
           ${porConf.size?[...porConf].sort((a,b)=>b[1]-a[1]).map(([q,n])=>`<tr><td>${esc(q)}</td><td>${n}</td></tr>`).join(""):`<tr><td class="mut">Nenhuma conferência marcada ainda</td><td></td></tr>`}</tbody></table>
         <table class="s"><thead><tr><th>Portal × Silegis</th><th>Proposições</th></tr></thead><tbody>
-          <tr><td>Conferem</td><td>${ITENS.length-div.length}</td></tr>
+          <tr><td>Conferem</td><td>${(tot.n-dc("Situação ≠")-dc("Só no portal")).toLocaleString("pt-BR")}</td></tr>
           <tr><td><a data-go="DIV">Situação diferente</a></td><td>${dc("Situação ≠")}</td></tr>
           <tr><td><a data-go="DIV">Só no Silegis</a></td><td>${dc("Só no Silegis")}</td></tr>
           <tr><td><a data-go="DIV">Só no portal</a></td><td>${dc("Só no portal")}</td></tr></tbody></table>
@@ -519,7 +522,7 @@ function bookmarklet(){
 
 /* ---------- Abas e navegação ---------- */
 function renderAbas(){
-  const n = id => id==="VER" ? ITENS.filter(x=>x.dec.d==="VERIFICAR").length : id==="DIV" ? ITENS.filter(x=>x.cruz!=="OK").length : id==="DEP" ? DEPS.length : id==="RES" ? "" : ITENS.filter(x=>x.aba===id).length;
+  const n = id => id==="VER" ? ITENS.filter(x=>x.dec.d==="VERIFICAR").length : id==="DIV" ? ITENS.filter(x=>naLista(x) && x.cruz!=="OK").length : id==="DEP" ? DEPS.length : id==="RES" ? "" : listaBase().filter(x=>x.aba===id).length;
   $("#tabs").innerHTML = ABAS.map(a=> a.gap ? `<span class="gap"></span>` : (a.id!=="RES"&&a.id!=="DEP"&&a.id!=="VER"&&a.id!=="DIV"&&!n(a.id)) ? "" :
     `<button class="tab${ABA===a.id?" on":""}" data-a="${a.id}" style="--c:${a.c}"><span class="dot"></span>${esc(a.nome||a.id)}${n(a.id)!==""?` <span class="n">${Number(n(a.id)).toLocaleString("pt-BR")}</span>`:""}</button>`).join("");
 }
@@ -535,7 +538,6 @@ function chips(){
 }
 $("#chips").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; delete (FCOL[ABA]||{})[b.dataset.c]; chips(); renderGrade(); });
 function segOn(sel, v){ document.querySelectorAll(sel+" button").forEach(b=>b.classList.toggle("on", b.dataset.v===v)); }
-$("#fArq").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; FARQ=b.dataset.v; segOn("#fArq",FARQ); render(); });
 $("#fImp").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; FIMP=b.dataset.v; segOn("#fImp",FIMP); render(); });
 let qT; $("#q").addEventListener("input", e=>{ clearTimeout(qT); qT=setTimeout(()=>{ Q=e.target.value; render(); },160); });
 $("#quem").value = QUEM;
