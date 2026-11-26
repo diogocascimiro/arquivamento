@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Arquivamento · ALMG.DIGITAL</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%238a5a1c'/%3E%3Crect x='11' y='14' width='42' height='11' rx='3' fill='%23fff'/%3E%3Cpath d='M15 29h34v18a4 4 0 0 1-4 4H19a4 4 0 0 1-4-4z' fill='%23fff'/%3E%3Crect x='25' y='34' width='14' height='4.5' rx='2.25' fill='%238a5a1c'/%3E%3C/svg%3E">
+<meta name="description" content="Listagem e conferência do arquivamento de proposições ao final da 20ª Legislatura da ALMG.">
+<meta name="theme-color" content="#f3f1ea">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ALMG.DIGITAL — tokens da marca (V5a: papel, verde-pedra e vinho) */
+:root{--red:#6e0d17;--green:#123b36;--paper:#f3f1ea;--card:#fff;--ink:#123b36;--muted:#5d625f;--line:#dcd8cf;--grid:#e6e2d8;--bg:#f3f1ea;--amber:#8a5a1c;
+--ok:#1f6b45;--okbg:#e3f1e8;--no:#6e0d17;--nobg:#f7e1e3;--warn:#8a5a1c;--warnbg:#f8ecd7;--sel:#e8f0ee;
+--f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;--f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;--f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;--rh:28px}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:13px;line-height:1.4;display:flex;flex-direction:column;overflow:hidden}
+a{color:inherit}
+button,input,select{font:inherit;color:inherit}
+/* Cabeçalho */
+.top{display:flex;align-items:center;gap:14px;padding:10px 16px;background:var(--paper);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.bar{display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:var(--green)} .mk{width:28px;height:28px;flex:none}
+.wm{font-family:var(--f-display);font-size:16px;white-space:nowrap} .wm b{font-weight:800} .wm i{font-style:normal;font-weight:800;color:var(--red)} .wm span{font-weight:500;letter-spacing:.06em}
+.sep{width:1px;height:22px;background:var(--line)}
+.app{display:flex;align-items:center;gap:8px;font-family:var(--f-display);font-weight:700;font-size:16px;color:var(--amber)}
+.app svg{width:24px;height:24px}
+.app small{font-family:var(--f-mono);font-weight:500;font-size:11px;color:var(--muted);letter-spacing:.04em}
+.who{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.who input{width:120px;padding:5px 8px;border:1px solid var(--line);border-radius:7px;background:#fff;text-transform:uppercase;font-family:var(--f-mono);font-size:12px}
+.status{font-family:var(--f-mono);font-size:11px;color:var(--muted);white-space:nowrap}
+.status b{color:var(--ink);font-weight:600}
+/* Barra de ferramentas */
+.tools{display:flex;align-items:center;gap:8px;padding:8px 16px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.search{position:relative}
+.search input{width:260px;padding:6px 10px 6px 28px;border:1px solid var(--line);border-radius:8px;background:var(--paper)}
+.search svg{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--paper)}
+.seg button{border:0;background:none;padding:5px 10px;cursor:pointer;font-size:12px;color:var(--muted);white-space:nowrap}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--green);color:#fff}
+.tools .lbl{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--green)}
+.btn.pri{background:var(--green);color:#fff;border-color:var(--green)}
+.count{margin-left:auto;font-family:var(--f-mono);font-size:11.5px;color:var(--muted)}
+.count b{color:var(--ink)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:5px;background:var(--sel);border:1px solid #c9dad5;border-radius:999px;padding:2px 4px 2px 9px;font-size:11.5px}
+.chip button{border:0;background:none;cursor:pointer;color:var(--muted);padding:0 4px;font-size:13px;line-height:1}
+/* Grade */
+.sheet{flex:1;overflow:auto;position:relative;background:#fff}
+table.g{border-collapse:separate;border-spacing:0;min-width:100%;table-layout:fixed;font-size:12.5px}
+.g th,.g td{border-right:1px solid var(--grid);border-bottom:1px solid var(--grid);height:var(--rh);padding:0 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;background:#fff}
+.g thead th{position:sticky;z-index:3;background:#f8f7f3;font-weight:600}
+.g thead tr.letters th{top:0;height:20px;font-family:var(--f-mono);font-size:10px;font-weight:500;color:#8c918e;text-align:center;background:#f1efe9}
+.g thead tr.heads th{top:20px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--green);text-align:left;height:30px;border-bottom:2px solid #cfcabd}
+.g thead tr.groups th{top:20px}
+.g th.rn,.g td.rn{position:sticky;left:0;z-index:2;width:46px;min-width:46px;text-align:center;background:#f1efe9;color:#8c918e;font-family:var(--f-mono);font-size:10.5px;padding:0}
+.g thead th.rn{z-index:4}
+.g td.pk{position:sticky;left:46px;z-index:1;font-family:var(--f-mono);font-weight:600;font-size:12px;border-right:2px solid #cfcabd}
+.g thead th.pk{left:46px;z-index:4;border-right:2px solid #cfcabd}
+.g tbody tr:hover td{background:#fbfaf6} .g tbody tr:hover td.rn{background:#ebe8e0}
+.g tbody tr.sel td{background:var(--sel)}
+.fbtn{float:right;border:0;background:none;cursor:pointer;color:#9aa09c;padding:0 0 0 4px;font-size:11px;line-height:28px}
+.fbtn.on{color:var(--red)}
+.pk a{text-decoration:none} .pk a:hover{text-decoration:underline}
+.lk{display:inline-flex;gap:3px;margin-left:6px;vertical-align:middle}
+.lk a{display:inline-grid;place-items:center;width:17px;height:17px;border-radius:4px;background:var(--paper);border:1px solid var(--line);font-size:9px;font-weight:700;text-decoration:none;color:var(--muted);font-family:var(--f-mono)}
+.lk a:hover{border-color:var(--green);color:var(--green)}
+.pill{display:inline-block;font-family:var(--f-mono);font-size:10.5px;font-weight:600;letter-spacing:.04em;padding:1px 7px;border-radius:999px;line-height:17px}
+.p-sim{background:var(--nobg);color:var(--no)} .p-nao{background:var(--okbg);color:var(--ok)} .p-ver{background:var(--warnbg);color:var(--warn)}
+.p-man{outline:1.5px dashed currentColor;outline-offset:1px}
+.x-ok{color:var(--ok)} .x-dif{color:var(--warn);font-weight:600} .x-so{color:var(--red);font-weight:600}
+td.ed{cursor:pointer;position:relative}
+td.ed:hover{box-shadow:inset 0 0 0 1.5px #b9cfc8}
+td.ed .ph{color:#b8bcb9}
+td.ed.done{color:var(--ok);font-weight:600;font-family:var(--f-mono);font-size:11.5px}
+td.ed.mine{background:#f1f8f4}
+.mut{color:var(--muted)}
+.empty{padding:60px 20px;text-align:center;color:var(--muted)}
+/* Abas da planilha */
+.tabs{display:flex;align-items:stretch;gap:2px;background:#ebe8e0;border-top:1px solid var(--line);padding:0 8px;overflow-x:auto;flex:none;scrollbar-width:thin}
+.tab{border:0;background:none;padding:8px 13px 7px;cursor:pointer;font-family:var(--f-mono);font-size:11.5px;font-weight:600;color:#5d625f;border-bottom:3px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.tab .n{font-weight:500;font-size:10.5px;color:#8c918e}
+.tab:hover{background:#e2dfd6}
+.tab.on{background:#fff;color:var(--green);border-bottom-color:var(--c,var(--green))}
+.tab .dot{width:7px;height:7px;border-radius:2px;background:var(--c,#7a9cc6)}
+.tabs .gap{width:10px;flex:none}
+/* Popover de filtro / editor */
+.pop{position:fixed;z-index:50;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 40px -12px rgba(0,0,0,.35);padding:8px;min-width:220px;max-width:340px}
+.pop input[type=text]{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:7px;margin-bottom:6px}
+.pop .lst{max-height:260px;overflow:auto}
+.pop label{display:flex;align-items:center;gap:7px;padding:3px 4px;border-radius:5px;cursor:pointer;font-size:12px}
+.pop label:hover{background:var(--paper)}
+.pop label span.c{margin-left:auto;font-family:var(--f-mono);font-size:10.5px;color:var(--muted)}
+.pop .row{display:flex;gap:6px;justify-content:flex-end;margin-top:8px}
+.pop .opt{display:block;width:100%;text-align:left;border:0;background:none;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12.5px}
+.pop .opt:hover{background:var(--paper)}
+.pop .opt.cur{font-weight:600;color:var(--green)}
+.pop h4{margin:2px 4px 6px;font-family:var(--f-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.pop textarea{width:100%;min-height:70px;border:1px solid var(--line);border-radius:7px;padding:6px 8px;font:inherit;resize:vertical}
+/* Resumo */
+.wrap{padding:22px clamp(16px,3vw,36px) 40px;max-width:1180px}
+.wrap h2{font-family:var(--f-display);font-size:22px;margin:0 0 4px}
+.wrap .sub{color:var(--muted);margin:0 0 18px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:22px}
+.kpi{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.kpi .v{font-family:var(--f-display);font-size:26px;font-weight:800;line-height:1.1}
+.kpi .l{font-family:var(--f-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.kpi.red .v{color:var(--red)} .kpi.green .v{color:var(--ok)} .kpi.amber .v{color:var(--warn)}
+table.s{border-collapse:collapse;width:100%;font-size:12.5px;margin-bottom:24px;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.s th,.s td{padding:7px 10px;border-bottom:1px solid var(--grid);text-align:right;white-space:nowrap}
+.s th{font-family:var(--f-mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);background:#f8f7f3;font-weight:600}
+.s th:first-child,.s td:first-child{text-align:left}
+.s tr.tot td{font-weight:700;background:#f8f7f3}
+.s td a{cursor:pointer;text-decoration:none;font-family:var(--f-mono);font-weight:600}
+.bar2{height:6px;border-radius:3px;background:var(--grid);overflow:hidden;min-width:80px}
+.bar2 i{display:block;height:100%;background:var(--ok)}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:860px){.cols2{grid-template-columns:1fr}}
+.box{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:18px}
+.box h3{margin:0 0 8px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--green)}
+.box p,.box li{color:#3b4240;margin:4px 0}
+.box ul{margin:4px 0;padding-left:18px}
+.bm{display:inline-block;padding:6px 12px;border-radius:8px;background:var(--amber);color:#fff;text-decoration:none;font-weight:600;cursor:grab}
+.toast{position:fixed;left:50%;bottom:58px;transform:translateX(-50%);background:var(--green);color:#fff;padding:8px 14px;border-radius:9px;font-size:12.5px;z-index:60;box-shadow:0 10px 30px -10px rgba(0,0,0,.4);opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+.load{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg);z-index:70;font-family:var(--f-mono);color:var(--muted)}
+.load .sp{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--amber);border-radius:50%;animation:r 1s linear infinite;margin:0 auto 12px}
+@keyframes r{to{transform:rotate(360deg)}}
+@media (max-width:700px){.search input{width:180px}.who input{width:90px}.status{display:none}}
+</style>
+</head>
+<body>
+<div class="load" id="load"><div><div class="sp"></div>Carregando a listagem…</div></div>
+
+<header class="top">
+  <a class="bar" href="https://almg.digital/" aria-label="ALMG.DIGITAL, início"><svg viewBox="0 0 64 64" class="mk" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#123b36"/><rect x="13" y="13" width="16" height="16" rx="4.5" fill="#f3f1ea"/><rect x="35" y="13" width="16" height="16" rx="4.5" fill="#f3f1ea" opacity=".5"/><rect x="13" y="35" width="16" height="16" rx="4.5" fill="#f3f1ea" opacity=".5"/><rect x="35" y="35" width="16" height="16" rx="8" fill="#6e0d17"/></svg><span class="wm"><b>ALMG</b><i>.</i><span>DIGITAL</span></span></a>
+  <span class="sep"></span>
+  <span class="app"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="18.7" fill="#8a5a1c"/><rect x="11" y="14" width="42" height="11" rx="3" fill="#fff"/><path d="M15 29h34v18a4 4 0 0 1-4 4H19a4 4 0 0 1-4-4z" fill="#fff"/><rect x="25" y="34" width="14" height="4.5" rx="2.25" fill="#8a5a1c"/></svg>Arquivamento <small>20ª LEGISLATURA · 31/01/2027</small></span>
+  <div class="who"><span class="status" id="status"></span><label for="quem">Seu nome</label><input id="quem" placeholder="NOME" maxlength="20" autocomplete="off"></div>
+</header>
+
+<div class="tools" id="tools">
+  <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="text" placeholder="Buscar proposição, autor, situação…" autocomplete="off"></div>
+  <span class="lbl">Arquiva?</span>
+  <div class="seg" id="fArq"><button data-v="" class="on">Todas</button><button data-v="SIM">Sim</button><button data-v="NÃO">Não</button><button data-v="VERIFICAR">Verificar</button></div>
+  <span class="lbl">Implantação</span>
+  <div class="seg" id="fImp"><button data-v="" class="on">Todas</button><button data-v="pend">Pendentes</button><button data-v="feita">Feitas</button><button data-v="mine">Minhas</button></div>
+  <div class="chips" id="chips"></div>
+  <span class="count" id="count"></span>
+  <button class="btn" id="csv" title="Baixar a aba filtrada em CSV"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 19h16"/></svg>CSV</button>
+</div>
+
+<main class="sheet" id="sheet"></main>
+<nav class="tabs" id="tabs"></nav>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const API = "https://arquivamento.diogocascimiro.workers.dev";
+const FIM = "2027-01-31";            // último dia da 20ª Legislatura
+const LIMITE_P2 = "2019-02-01";     // § 2º do art. 180: recebidas até a 18ª Legislatura (até 31/01/2019)
+const EQUIPE = ["ALINE","ANDRÉ","DIOGO","KÁTIA","LEO","SAMARA"];
+// Deputados reeleitos em 4/10/2026 para a 21ª Legislatura (nomes como constam na autoria)
+const REELEITOS_BASE = ["Bruno Engler","Beatriz Cerqueira","Eduardo Azevedo","Lud Falcão","Macaé Evaristo","Antonio Carlos Arantes","Neilando Pimenta","Elismar Prado","Chiara Biondini","Enes Cândido","Sargento Rodrigues","João Magalhães","Doorgal Andrada","Duarte Bechir","Grego da Fundação","Gustavo Valadares","Adriano Alvarenga","Lucas Lasmar","Maria Clara Marra","Noraldino Júnior","Leninha","Rodrigo Lopes","Gil Pereira","Delegado Christiano Xavier","Betinho Pinto Coelho","Mauro Tramonte","Nayara Rocha","Ulysses Gomes","Carlos Henrique","Ana Paula Siqueira","Carol Caram","Raul Belém","Cristiano Silveira","Tito Torres","Delegada Sheila","Ricardo Campos","Zé Guilherme","Dr. Maurício","Alê Portela","Zé Laviola","Vitório Júnior","Marquinho Lemos","Betão","Andréia de Jesus","Gustavo Santana","Leleco Pimentel","Roberto Andrade","Doutor Jean Freire","Marli Ribeiro","Luizinho","Mário Henrique Caixa","Coronel Henrique","Amanda Teixeira Dias"];
+const ABAS = [
+  {id:"RES", nome:"#", c:"#123b36"},
+  {id:"VER", nome:"VERIFICAR", c:"#8a5a1c"},
+  {id:"PL", c:"#3c78d8"},{id:"PLC", c:"#4a86e8"},{id:"PEC", c:"#4a86e8"},{id:"PRE", c:"#4a86e8"},
+  {id:"RQN", c:"#4a86e8"},{id:"RQC", c:"#4a86e8"},{id:"RQO", c:"#4a86e8"},
+  {id:"MSG", c:"#3d85c6"},{id:"IND", c:"#3d85c6"},{id:"OFI", c:"#4a86e8"},{id:"RPR", c:"#4a86e8"},{id:"PLE", c:"#4a86e8"},
+  {id:"OUTROS", c:"#7a9cc6"},
+  {gap:true},
+  {id:"DIV", nome:"PORTAL × SILEGIS", c:"#6e0d17"},
+  {id:"DEP", c:"#5d625f"},
+];
+const TIPOS_ABA = new Set(["PL","PLC","PEC","PRE","RQN","RQC","RQO","MSG","IND","OFI","RPR","PLE"]);
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm = s => String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/^(deputad[oa]|dep\.)\s+/,"").replace(/\s+/g," ").trim();
+const fmtD = s => s ? s.slice(8,10)+"/"+s.slice(5,7)+"/"+s.slice(0,4) : "";
+const fmtDH = s => { if(!s) return "—"; const d=new Date(s); return d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"})+" "+d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}); };
+let toastT; const toast = m => { const t=$("#toast"); t.textContent=m; t.classList.add("on"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("on"),2400); };
+const lsGet = (k,d) => { try { const v=localStorage.getItem(k); return v==null?d:JSON.parse(v); } catch(e){ return d; } };
+const lsSet = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
+
+let DADOS = null, ITENS = [], POR_CHAVE = new Map(), MARCAS = new Map(), DEPS = [];
+let ABA = lsGet("arq:aba","RES"), Q = "", FARQ = "", FIMP = "", FCOL = {}; // FCOL[aba][col] = Set de valores
+let QUEM = lsGet("arq:quem","");
+
+/* ---------- Regras do art. 180 + DNP 26/2018 ---------- */
+const ehTemporaria = n => /extraordin|especial|inqu[eé]rito|\bcpi\b|tempor[aá]ri/i.test(n);
+function tipoAutor(nome, tipo){
+  if (tipo) return tipo;
+  if (/^deputad/i.test(nome)) return "Deputado";
+  if (/^comiss/i.test(nome)) return "Comissão";
+  if (/governador/i.test(nome)) return "Governador do Estado";
+  if (/popular/i.test(nome)) return "Autoria Popular";
+  return "Outro";
+}
+let REEL = new Set();
+function montarReeleitos(){
+  REEL = new Set(REELEITOS_BASE.map(norm));
+  for (const [k,m] of MARCAS) if (k.startsWith("DEP:") && m.reeleito) { const n=norm(k.slice(4)); if (m.reeleito.valor==="SIM") REEL.add(n); else REEL.delete(n); }
+}
+function avaliar(x){
+  const t = x.t, aut = x.aut, recebida = x.dp || (x.a+"-01-01");
+  const antiga = recebida < LIMITE_P2;
+  const deps = aut.filter(a=>a.tipo==="Deputado");
+  const reel = deps.filter(a=>REEL.has(norm(a.nome)));
+  const ex = (inciso, motivo) => antiga
+    ? {d:"SIM", m:`${motivo}, mas recebida em ${recebida.slice(0,4)} (§ 2º)`, r:"§ 2º"}
+    : {d:"NÃO", m:motivo, r:inciso};
+  if (t==="VET" || t==="IMP") return {d:"NÃO", m:"Veto ou matéria impugnada", r:"§ 1º, V"};
+  if (aut.some(a=>a.tipo==="Autoria Popular")) return ex("§ 1º, III","Iniciativa popular");
+  if (t==="PLE") return ex("§ 1º, IV","Proposta de ação legislativa");
+  if (x.rel.some(r=>/originada de|originou-se d/i.test(r[0]) && /^(PLE|REI)\b/.test(r[1]))) return ex("§ 1º, IV","Originada de proposta de ação legislativa");
+  if (aut.some(a=>a.tipo==="Comissão" && ehTemporaria(a.nome))) return {d:"NÃO", m:"Autoria de comissão temporária", r:"DNP 26, 3"};
+  if (/diretrizes (para a elabora|or[cç]ament)|lei or[cç]ament[aá]ria anual|estima as receitas e fixa as despesas|plano plurianual|ppag/i.test(x.em) && aut.some(a=>/governador/i.test(a.tipo+a.nome)))
+    return ex("§ 1º, II","LDO, LOA ou PPAG");
+  if (/contas (do governador|anuais do governador|do tribunal de contas)|presta[cç][aã]o de contas do governador/i.test(x.em)) return {d:"NÃO", m:"Contas do Governador ou do TCE", r:"§ 1º, VI"};
+  if (/^RQ/.test(t)) return {d:"SIM", m: reel.length ? "Requerimento (arquiva mesmo de reeleito)" : "Requerimento", r:"§ 1º, I"};
+  if (t==="PEC" && deps.length){
+    if (reel.length >= 26) return ex("DNP 26, 1",`PEC com ${reel.length} autores reeleitos (≥ 1/3)`);
+    return {d:"SIM", m:`PEC com ${reel.length} autor${reel.length===1?"":"es"} reeleito${reel.length===1?"":"s"} (< 1/3)`, r:"DNP 26, 1"};
+  }
+  if (reel.length) return ex("§ 1º, I", (deps.length>1?"Autoria coletiva com reeleito: ":"Autor reeleito: ")+reel.map(a=>a.nome.replace(/^Deputad[oa] /,"")).join(", "));
+  if (deps.length) return {d:"SIM", m: deps.length>1 ? "Nenhum autor reeleito" : "Autor não reeleito", r:"art. 180"};
+  const quem = aut.length ? aut[0].nome : "sem autoria";
+  return {d:"SIM", m:"Autoria: "+quem, r:"art. 180"};
+}
+
+/* ---------- Junta portal e Silegis ---------- */
+const chave = (t,n,a) => `${String(t).replace(/\.$/,"")} ${n} ${a}`;
+function parseId(s){ const m=String(s).match(/^([A-Z]{2,4})\.?\s*(?:n[ºo°]\s*)?(\d+)\s*\/\s*(\d{4})/); return m ? chave(m[1],+m[2],+m[3]) : null; }
+function montar(){
+  const P = new Map(), S = new Map();
+  for (const x of DADOS.portal.itens||[]) P.set(chave(x.t,x.n,x.a), x);
+  for (const x of DADOS.silegis.itens||[]) S.set(chave(x.t,x.n,x.a), x);
+  const keys = new Set([...P.keys(), ...S.keys()]);
+  ITENS = []; POR_CHAVE = new Map();
+  for (const k of keys){
+    const p = P.get(k), s = S.get(k);
+    const [t,n,a] = k.split(" ");
+    const aut = s ? s.aut.map(([tp,nm])=>({tipo:tipoAutor(nm,tp), nome:nm})) : (p.aut||[]).map(nm=>({tipo:tipoAutor(nm), nome:nm}));
+    const rel = s ? s.rel : [];
+    const anexadaA = rel.filter(r=>/^anexad[oa] a/i.test(r[0])).map(r=>parseId(r[1])).filter(Boolean);
+    const anexos = rel.filter(r=>/possui como anexo/i.test(r[0])).map(r=>parseId(r[1])).filter(Boolean);
+    let cruz = "OK";
+    if (!p) cruz = "Só no Silegis"; else if (!s) cruz = "Só no portal";
+    else if ((p.sit||"") !== (s.sit||"")) cruz = "Situação ≠";
+    const x = { k, t, n:+n, a:+a, aut, rel, anexadaA, anexos,
+      sit: (s&&s.sitd) || (p&&p.sitd) || "", sitS: s&&s.sitd||"", sitP: p&&p.sitd||"", sigS:s&&s.sit||"", sigP:p&&p.sit||"",
+      loc: (s&&s.loc) || (p&&p.loc) || "", dp: (s&&s.dp) || (p&&p.dp) || "", em: (s&&s.em) || (p&&p.em) || "", cruz,
+      aba: TIPOS_ABA.has(t) ? t : "OUTROS" };
+    ITENS.push(x); POR_CHAVE.set(k, x);
+  }
+  ITENS.sort((u,v)=> u.t.localeCompare(v.t) || u.a-v.a || u.n-v.n);
+  reavaliar();
+}
+function reavaliar(){
+  montarReeleitos();
+  for (const x of ITENS){ const r = avaliar(x); x.auto = r; }
+  // anexação: anexada que fica com principal que arquiva (DNP 26, item 2) ou o contrário
+  for (const x of ITENS){
+    x.ver = "";
+    for (const pk of x.anexadaA){ const p = POR_CHAVE.get(pk); if (!p) continue;
+      if (p.auto.d==="SIM" && x.auto.d==="NÃO") x.ver = `Anexada a ${pk}, que arquiva: segue tramitando (DNP 26, 2)`;
+      else if (p.auto.d==="NÃO" && x.auto.d==="SIM") x.ver = `Anexada a ${pk}, que não arquiva`;
+    }
+    const man = marca(x.k,"decisao");
+    x.dec = man ? {d:man, m:"Decisão manual", r:"manual", man:true} : (x.ver ? {d:"VERIFICAR", m:x.ver, r:x.auto.r, base:x.auto} : x.auto);
+  }
+  DEPS = calcDeps();
+}
+function calcDeps(){
+  const m = new Map();
+  for (const x of ITENS) for (const a of x.aut) if (a.tipo==="Deputado"){
+    const k=a.nome; if(!m.has(k)) m.set(k,{nome:k, n:0, arq:0});
+    const o=m.get(k); o.n++; if (x.dec.d==="SIM") o.arq++;
+  }
+  return [...m.values()].map(o=>({...o, reel: REEL.has(norm(o.nome)), man: marca("DEP:"+o.nome,"reeleito")})).sort((a,b)=>a.nome.localeCompare(b.nome));
+}
+
+/* ---------- Marcações ---------- */
+const marca = (k,c) => { const m=MARCAS.get(k); return m && m[c] ? m[c].valor : ""; };
+const marcaObj = (k,c) => { const m=MARCAS.get(k); return m && m[c] || null; };
+function setLocal(k,c,v,q,em){ if(!MARCAS.has(k)) MARCAS.set(k,{}); const m=MARCAS.get(k); if (v==="") delete m[c]; else m[c]={valor:v, quem:q, em}; }
+async function gravar(k,c,v){
+  if (!QUEM){ $("#quem").focus(); toast("Preencha seu nome no alto da página"); return false; }
+  const em = new Date().toISOString(); setLocal(k,c,v,QUEM,em);
+  try {
+    const r = await fetch(API+"/marcas",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({chave:k,campo:c,valor:v,quem:QUEM})});
+    if (!r.ok) throw 0;
+  } catch(e){ toast("Não foi possível salvar agora. Tente de novo."); return false; }
+  return true;
+}
+
+/* ---------- Colunas ---------- */
+const silegisURL = x => "https://silegis.almg.gov.br/silegismg/#/processos?sintaxe=LUCENE_EXTENDIDO&pesquisa=" + encodeURIComponent(`identificadorProposicao.proposicaoTipo:"${x.t}" AND identificadorProposicao.proposicaoNumero:"${x.n}" AND identificadorProposicao.proposicaoAno:"${x.a}"`);
+const portalURL = x => `https://www.almg.gov.br/projetos-de-lei/${x.t}/${x.n}/${x.a}`;
+const pillDec = d => `<span class="pill ${d.d==="SIM"?"p-sim":d.d==="NÃO"?"p-nao":"p-ver"}${d.man?" p-man":""}">${d.d==="SIM"?"ARQUIVA":d.d==="NÃO"?"NÃO ARQUIVA":"VERIFICAR"}</span>`;
+const autTxt = x => x.aut.map(a=>a.nome.replace(/^Deputad[oa] /,"Dep. ")).join("; ");
+const quemCell = (x,c) => { const o=marcaObj(x.k,c); return o ? o.valor : ""; };
+const COLS = [
+  {id:"pk", h:"Proposição", w:150, v:x=>x.k, html:x=>`<a href="${portalURL(x)}" target="_blank" rel="noopener">${esc(x.k)}</a><span class="lk"><a href="${silegisURL(x)}" target="_blank" rel="noopener" title="Abrir no Silegis">S</a></span>`, filt:false},
+  {id:"dec", h:"Arquiva?", w:118, v:x=>x.dec.d==="SIM"?"ARQUIVA":x.dec.d==="NÃO"?"NÃO ARQUIVA":"VERIFICAR", html:x=>pillDec(x.dec), ed:"decisao"},
+  {id:"mot", h:"Fundamento", w:300, v:x=>x.dec.m, html:x=>`<span title="${esc(x.dec.m+" · "+x.dec.r)}">${esc(x.dec.m)}</span>`, filt:false},
+  {id:"aut", h:"Autoria", w:230, v:x=>autTxt(x), html:x=>`<span title="${esc(autTxt(x))}">${esc(autTxt(x))}</span>`, fv:x=>x.aut.map(a=>a.nome.replace(/^Deputad[oa] /,"Dep. "))},
+  {id:"sit", h:"Situação", w:230, v:x=>x.sit, html:x=>`<span title="${esc(x.sit)}">${esc(x.sit)}</span>`},
+  {id:"loc", h:"Local", w:200, v:x=>x.loc, html:x=>`<span title="${esc(x.loc)}">${esc(x.loc)}</span>`},
+  {id:"anx", h:"Anexação", w:150, v:x=>x.anexadaA.length?"Anexada a "+x.anexadaA.join(", "):(x.anexos.length?x.anexos.length+" anexada"+(x.anexos.length>1?"s":""):""), html:x=> x.anexadaA.length?`<span class="mut">à</span> ${esc(x.anexadaA.join(", "))}`:(x.anexos.length?`<span class="mut" title="${esc(x.anexos.join(", "))}">${x.anexos.length} anexada${x.anexos.length>1?"s":""}</span>`:""), fv:x=>x.anexadaA.length?"Anexada":(x.anexos.length?"Tem anexadas":"Sem anexação")},
+  {id:"ano", h:"Ano", w:58, v:x=>String(x.a), html:x=>`<span class="mut">${x.a}</span>`},
+  {id:"cruz", h:"Portal × Silegis", w:128, v:x=>x.cruz, html:x=>`<span class="${x.cruz==="OK"?"x-ok":/^Só/.test(x.cruz)?"x-so":"x-dif"}" title="${esc(x.cruz==="Situação ≠"?("Portal: "+x.sitP+" | Silegis: "+x.sitS):x.cruz)}">${x.cruz==="OK"?"✓ confere":esc(x.cruz)}</span>`},
+  {id:"imp", h:"Implantação", w:112, v:x=>quemCell(x,"imp")||"(pendente)", html:x=>quemCell(x,"imp")||`<span class="ph">—</span>`, ed:"imp"},
+  {id:"conf", h:"Conferência", w:112, v:x=>quemCell(x,"conf")||"(pendente)", html:x=>quemCell(x,"conf")||`<span class="ph">—</span>`, ed:"conf"},
+  {id:"rec", h:"Recolhido?", w:118, v:x=>marca(x.k,"rec")||"(vazio)", html:x=>marca(x.k,"rec")||`<span class="ph">—</span>`, ed:"rec"},
+  {id:"obs", h:"Obs.", w:220, v:x=>marca(x.k,"obs"), html:x=>esc(marca(x.k,"obs"))||`<span class="ph">…</span>`, ed:"obs", filt:false},
+];
+const LETRAS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+/* ---------- Filtros ---------- */
+function filtrar(lista, aba){
+  const qq = norm(Q), fc = FCOL[aba] || {};
+  return lista.filter(x=>{
+    if (FARQ && x.dec.d!==FARQ) return false;
+    if (FIMP==="pend" && quemCell(x,"imp")) return false;
+    if (FIMP==="feita" && !quemCell(x,"imp")) return false;
+    if (FIMP==="mine" && quemCell(x,"imp")!==QUEM && quemCell(x,"conf")!==QUEM) return false;
+    for (const cid in fc){ const set=fc[cid]; if(!set||!set.size) continue; const col=COLS.find(c=>c.id===cid);
+      const vals = col.fv ? [].concat(col.fv(x)) : [col.v(x)]; if (!vals.some(v=>set.has(v))) return false; }
+    if (qq){ const hay = norm(x.k+" "+autTxt(x)+" "+x.sit+" "+x.loc+" "+x.dec.m+" "+x.em+" "+marca(x.k,"obs")+" "+quemCell(x,"imp")+" "+quemCell(x,"conf")); if(!hay.includes(qq)) return false; }
+    return true;
+  });
+}
+function listaDaAba(aba){
+  if (aba==="VER") return ITENS.filter(x=>x.dec.d==="VERIFICAR" || (x.dec.man && x.ver));
+  if (aba==="DIV") return ITENS.filter(x=>x.cruz!=="OK");
+  return ITENS.filter(x=>x.aba===aba);
+}
+
+/* ---------- Grade virtualizada ---------- */
+let VIS = [], RENDER = null;
+function renderGrade(){
+  const aba = ABA, base = listaDaAba(aba);
+  VIS = filtrar(base, aba);
+  const cols = aba==="VER" ? COLS.slice() : COLS;
+  const fc = FCOL[aba] || {};
+  const total = base.length, arq = VIS.filter(x=>x.dec.d==="SIM").length;
+  $("#count").innerHTML = `<b>${VIS.length.toLocaleString("pt-BR")}</b> de ${total.toLocaleString("pt-BR")} · <b>${arq.toLocaleString("pt-BR")}</b> a arquivar`;
+  const w = 46 + cols.reduce((s,c)=>s+c.w,0);
+  const sh = $("#sheet");
+  sh.innerHTML = `<table class="g" style="width:${w}px"><colgroup><col style="width:46px">${cols.map(c=>`<col style="width:${c.w}px">`).join("")}</colgroup>
+  <thead><tr class="letters"><th class="rn"></th>${cols.map((c,i)=>`<th class="${c.id==="pk"?"pk":""}">${LETRAS[i]}</th>`).join("")}</tr>
+  <tr class="heads"><th class="rn">#</th>${cols.map(c=>`<th class="${c.id==="pk"?"pk":""}">${esc(c.h)}${c.filt===false?"":`<button class="fbtn${fc[c.id]&&fc[c.id].size?" on":""}" data-f="${c.id}" title="Filtrar">▾</button>`}</th>`).join("")}</tr></thead>
+  <tbody id="tb"></tbody></table>${VIS.length?"":`<div class="empty">Nenhuma proposição com esses filtros.</div>`}`;
+  const tb = $("#tb"), RH = 28, BUF = 12;
+  RENDER = () => {
+    const top = sh.scrollTop, h = sh.clientHeight;
+    const i0 = Math.max(0, Math.floor(top/RH) - BUF), i1 = Math.min(VIS.length, Math.ceil((top+h)/RH) + BUF);
+    let html = i0 ? `<tr style="height:${i0*RH}px"><td colspan="${cols.length+1}" style="padding:0;border:0"></td></tr>` : "";
+    for (let i=i0;i<i1;i++){ const x=VIS[i];
+      html += `<tr data-k="${esc(x.k)}"><td class="rn">${i+1}</td>${cols.map(c=>{
+        if (c.ed){ const mine = (c.ed==="imp"||c.ed==="conf") && QUEM && quemCell(x,c.ed)===QUEM; const done=(c.ed==="imp"||c.ed==="conf") && quemCell(x,c.ed);
+          return `<td class="ed${done?" done":""}${mine?" mine":""}" data-ed="${c.ed}">${c.html(x)}</td>`; }
+        return `<td class="${c.id==="pk"?"pk":""}">${c.html(x)}</td>`; }).join("")}</tr>`; }
+    const rest = VIS.length - i1; if (rest>0) html += `<tr style="height:${rest*RH}px"><td colspan="${cols.length+1}" style="padding:0;border:0"></td></tr>`;
+    tb.innerHTML = html;
+  };
+  RENDER();
+}
+$("#sheet").addEventListener("scroll", ()=>{ if (RENDER) requestAnimationFrame(RENDER); }, {passive:true});
+
+/* ---------- Popovers ---------- */
+let POP = null;
+function fecharPop(){ if (POP){ POP.remove(); POP=null; } }
+document.addEventListener("mousedown", e=>{ if (POP && !POP.contains(e.target)) fecharPop(); });
+document.addEventListener("keydown", e=>{ if (e.key==="Escape") fecharPop(); });
+function abrirPop(anchor, html){
+  fecharPop(); const p=document.createElement("div"); p.className="pop"; p.innerHTML=html; document.body.appendChild(p);
+  const r=anchor.getBoundingClientRect(); let x=r.left, y=r.bottom+4;
+  if (x+p.offsetWidth>innerWidth-8) x=innerWidth-p.offsetWidth-8; if (y+p.offsetHeight>innerHeight-8) y=Math.max(8,r.top-p.offsetHeight-4);
+  p.style.left=x+"px"; p.style.top=y+"px"; POP=p; return p;
+}
+function popFiltro(btn, cid){
+  const col = COLS.find(c=>c.id===cid), base = listaDaAba(ABA);
+  const cnt = new Map(); for (const x of base) for (const v of [].concat(col.fv?col.fv(x):col.v(x))) cnt.set(v,(cnt.get(v)||0)+1);
+  const vals = [...cnt.entries()].sort((a,b)=>b[1]-a[1]||String(a[0]).localeCompare(String(b[0])));
+  const cur = (FCOL[ABA]||{})[cid] || new Set();
+  const p = abrirPop(btn, `<h4>Filtrar: ${esc(col.h)}</h4><input type="text" placeholder="Procurar valor…"><div class="lst">${vals.map(([v,n])=>`<label data-v="${esc(v)}"><input type="checkbox" ${cur.has(v)?"checked":""}> <span>${esc(v)||"<i class=mut>(vazio)</i>"}</span><span class="c">${n}</span></label>`).join("")}</div><div class="row"><button class="btn" data-a="limpar">Limpar</button><button class="btn pri" data-a="ok">Aplicar</button></div>`);
+  const inp = p.querySelector("input[type=text]"); inp.focus();
+  inp.addEventListener("input", ()=>{ const q=norm(inp.value); p.querySelectorAll("label").forEach(l=>l.style.display=norm(l.dataset.v).includes(q)?"":"none"); });
+  p.addEventListener("click", e=>{ const a=e.target.closest("button")?.dataset.a; if(!a) return;
+    FCOL[ABA] = FCOL[ABA] || {};
+    if (a==="limpar") delete FCOL[ABA][cid];
+    else { const s=new Set(); p.querySelectorAll("label").forEach(l=>{ if(l.querySelector("input").checked) s.add(l.dataset.v); }); if (s.size) FCOL[ABA][cid]=s; else delete FCOL[ABA][cid]; }
+    fecharPop(); chips(); renderGrade(); });
+}
+function popEditor(td, x, campo){
+  const atual = campo==="decisao" ? marca(x.k,"decisao") : marca(x.k,campo);
+  const o = marcaObj(x.k,campo);
+  const rodape = o ? `<div class="mut" style="font-size:11px;margin:6px 4px 0">Por ${esc(o.quem)} em ${fmtDH(o.em)}</div>` : "";
+  let html="";
+  if (campo==="imp"||campo==="conf"){
+    const nomes=[...new Set([QUEM,...EQUIPE].filter(Boolean))];
+    html = `<h4>${campo==="imp"?"Implantado por":"Conferido por"}</h4>${nomes.map(n=>`<button class="opt${atual===n?" cur":""}" data-v="${esc(n)}">${esc(n)}${n===QUEM?" <span class=mut>(você)</span>":""}</button>`).join("")}<button class="opt" data-v="" style="color:var(--red)">Limpar</button>${rodape}`;
+  } else if (campo==="rec"){
+    html = `<h4>Recolhido pelo Arquivo?</h4>${["SIM","DESARQUIVADO","NÃO"].map(v=>`<button class="opt${atual===v?" cur":""}" data-v="${v}">${v}</button>`).join("")}<button class="opt" data-v="" style="color:var(--red)">Limpar</button>${rodape}`;
+  } else if (campo==="decisao"){
+    html = `<h4>Decisão</h4><div class="mut" style="font-size:11.5px;margin:0 4px 6px">Automático: ${esc(x.auto.d==="SIM"?"arquiva":"não arquiva")} — ${esc(x.auto.m)}${x.ver?"<br>⚠ "+esc(x.ver):""}</div>${[["","Automático (regra)"],["SIM","Arquiva"],["NÃO","Não arquiva"]].map(([v,l])=>`<button class="opt${atual===v?" cur":""}" data-v="${v}">${l}</button>`).join("")}${rodape}`;
+  } else if (campo==="obs"){
+    html = `<h4>Observação · ${esc(x.k)}</h4><textarea>${esc(atual)}</textarea><div class="row"><button class="btn" data-a="cancel">Cancelar</button><button class="btn pri" data-a="save">Salvar</button></div>${rodape}`;
+  }
+  const p = abrirPop(td, html);
+  const salvar = async v => { fecharPop(); const ok = await gravar(x.k,campo,v); if (campo==="decisao") reavaliar(); renderGrade(); if(ok) toast("Salvo"); };
+  p.addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return;
+    if (b.dataset.a==="cancel") return fecharPop();
+    if (b.dataset.a==="save") return salvar(p.querySelector("textarea").value.trim());
+    if (b.dataset.v!==undefined) salvar(b.dataset.v); });
+  const ta=p.querySelector("textarea"); if(ta){ ta.focus(); ta.addEventListener("keydown",e=>{ if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)) salvar(ta.value.trim()); }); }
+}
+$("#sheet").addEventListener("click", e=>{
+  const fb = e.target.closest(".fbtn"); if (fb){ e.stopPropagation(); return popFiltro(fb, fb.dataset.f); }
+  const td = e.target.closest("td.ed"); if (td){ const k=td.parentElement.dataset.k; const x=POR_CHAVE.get(k); if(x) popEditor(td,x,td.dataset.ed); return; }
+  const dep = e.target.closest("[data-dep]"); if (dep) return popDep(dep, dep.dataset.dep);
+  const go = e.target.closest("[data-go]"); if (go){ irPara(go.dataset.go, go.dataset.farq||""); }
+});
+function popDep(el, nome){
+  const d = DEPS.find(o=>o.nome===nome); const atual = d.man;
+  const p = abrirPop(el, `<h4>${esc(nome.replace(/^Deputad[oa] /,""))}</h4>${[["","Automático ("+(REELEITOS_BASE.map(norm).includes(norm(nome))?"reeleito":"não reeleito")+")"],["SIM","Reeleito"],["NÃO","Não reeleito"]].map(([v,l])=>`<button class="opt${atual===v?" cur":""}" data-v="${v}">${l}</button>`).join("")}`);
+  p.addEventListener("click", async e=>{ const b=e.target.closest("button"); if(!b) return; fecharPop(); await gravar("DEP:"+nome,"reeleito",b.dataset.v); reavaliar(); render(); toast("Salvo"); });
+}
+
+/* ---------- Abas especiais ---------- */
+function renderResumo(){
+  const tipos = [...new Set(ITENS.map(x=>x.aba))];
+  const ordem = ABAS.filter(a=>a.id && (TIPOS_ABA.has(a.id)||a.id==="OUTROS")).map(a=>a.id).filter(id=>tipos.includes(id));
+  const linha = lista => { const arq=lista.filter(x=>x.dec.d==="SIM"); const imp=arq.filter(x=>quemCell(x,"imp")).length; const conf=arq.filter(x=>quemCell(x,"conf")).length; const rec=arq.filter(x=>marca(x.k,"rec")==="SIM").length;
+    return {n:lista.length, arq:arq.length, nao:lista.filter(x=>x.dec.d==="NÃO").length, ver:lista.filter(x=>x.dec.d==="VERIFICAR").length, imp, conf, rec}; };
+  const tot = linha(ITENS);
+  const porPessoa = new Map(); for (const x of ITENS){ const q=quemCell(x,"imp"); if(q) porPessoa.set(q,(porPessoa.get(q)||0)+1); }
+  const porConf = new Map(); for (const x of ITENS){ const q=quemCell(x,"conf"); if(q) porConf.set(q,(porConf.get(q)||0)+1); }
+  const div = ITENS.filter(x=>x.cruz!=="OK"); const dc = c => div.filter(x=>x.cruz===c).length;
+  const pct = (a,b) => b ? Math.round(a/b*100) : 0;
+  const bm = bookmarklet();
+  $("#count").innerHTML = "";
+  $("#sheet").innerHTML = `<div class="wrap">
+    <h2>Arquivamento ao final da 20ª Legislatura</h2>
+    <p class="sub">Proposições em tramitação no portal e no Silegis, com a regra do art. 180 do Regimento Interno e da DNP 26/2018 aplicada a cada uma. Fim da legislatura: 31/01/2027.</p>
+    <div class="cards">
+      <div class="kpi"><div class="v">${tot.n.toLocaleString("pt-BR")}</div><div class="l">Em tramitação</div></div>
+      <div class="kpi red"><div class="v">${tot.arq.toLocaleString("pt-BR")}</div><div class="l">A arquivar</div></div>
+      <div class="kpi green"><div class="v">${tot.nao.toLocaleString("pt-BR")}</div><div class="l">Não arquivam</div></div>
+      <div class="kpi amber"><div class="v">${tot.ver.toLocaleString("pt-BR")}</div><div class="l">A verificar</div></div>
+      <div class="kpi"><div class="v">${pct(tot.imp,tot.arq)}%</div><div class="l">Implantados (${tot.imp.toLocaleString("pt-BR")})</div></div>
+      <div class="kpi"><div class="v">${pct(tot.conf,tot.arq)}%</div><div class="l">Conferidos (${tot.conf.toLocaleString("pt-BR")})</div></div>
+    </div>
+    <table class="s"><thead><tr><th>Tipo</th><th>Em tramitação</th><th>A arquivar</th><th>Não arquivam</th><th>Verificar</th><th>Implantados</th><th>Conferidos</th><th>Recolhidos</th><th style="width:140px">Progresso</th></tr></thead><tbody>
+      ${ordem.map(id=>{ const l=linha(ITENS.filter(x=>x.aba===id)); return `<tr><td><a data-go="${id}">${id}</a></td><td>${l.n}</td><td><a data-go="${id}" data-farq="SIM">${l.arq}</a></td><td>${l.nao}</td><td>${l.ver?`<a data-go="${id}" data-farq="VERIFICAR">${l.ver}</a>`:0}</td><td>${l.imp}</td><td>${l.conf}</td><td>${l.rec}</td><td><div class="bar2"><i style="width:${pct(l.imp,l.arq)}%"></i></div></td></tr>`; }).join("")}
+      <tr class="tot"><td>TOTAL</td><td>${tot.n}</td><td>${tot.arq}</td><td>${tot.nao}</td><td>${tot.ver}</td><td>${tot.imp}</td><td>${tot.conf}</td><td>${tot.rec}</td><td><div class="bar2"><i style="width:${pct(tot.imp,tot.arq)}%"></i></div></td></tr>
+    </tbody></table>
+    <div class="cols2">
+      <div>
+        <table class="s"><thead><tr><th>Implantação</th><th>Proposições</th></tr></thead><tbody>
+          ${porPessoa.size?[...porPessoa].sort((a,b)=>b[1]-a[1]).map(([q,n])=>`<tr><td>${esc(q)}</td><td>${n}</td></tr>`).join(""):`<tr><td class="mut">Nenhuma implantação marcada ainda</td><td></td></tr>`}
+          <tr class="tot"><td>TOTAL</td><td>${[...porPessoa.values()].reduce((a,b)=>a+b,0)}</td></tr></tbody></table>
+        <table class="s"><thead><tr><th>Conferência</th><th>Proposições</th></tr></thead><tbody>
+          ${porConf.size?[...porConf].sort((a,b)=>b[1]-a[1]).map(([q,n])=>`<tr><td>${esc(q)}</td><td>${n}</td></tr>`).join(""):`<tr><td class="mut">Nenhuma conferência marcada ainda</td><td></td></tr>`}</tbody></table>
+        <table class="s"><thead><tr><th>Portal × Silegis</th><th>Proposições</th></tr></thead><tbody>
+          <tr><td>Conferem</td><td>${ITENS.length-div.length}</td></tr>
+          <tr><td><a data-go="DIV">Situação diferente</a></td><td>${dc("Situação ≠")}</td></tr>
+          <tr><td><a data-go="DIV">Só no Silegis</a></td><td>${dc("Só no Silegis")}</td></tr>
+          <tr><td><a data-go="DIV">Só no portal</a></td><td>${dc("Só no portal")}</td></tr></tbody></table>
+      </div>
+      <div>
+        <div class="box"><h3>Regra aplicada</h3><ul>
+          <li><b>Arquivam</b> todas as proposições em tramitação (art. 180), exceto as do § 1º.</li>
+          <li><b>Não arquivam:</b> autoria de deputado reeleito (${REEL.size} reeleitos), inclusive autoria coletiva com algum reeleito; LDO, LOA e PPAG; iniciativa popular; proposta de ação legislativa e o que dela se originou; veto e matéria impugnada; contas do Governador e do TCE; autoria de comissão temporária (DNP 26, 3).</li>
+          <li><b>Requerimentos</b> arquivam mesmo quando o autor foi reeleito (§ 1º, I).</li>
+          <li><b>PEC</b> arquiva se os autores reeleitos forem menos de 1/3 da Assembleia, ou seja, menos de 26 (DNP 26, 1).</li>
+          <li><b>§ 2º:</b> as exceções dos incisos I a IV arquivam se a proposição foi recebida até a 18ª Legislatura (até 31/01/2019).</li>
+          <li><b>Verificar:</b> anexada cujo destino difere da principal (DNP 26, 2). A decisão pode ser marcada à mão na coluna “Arquiva?”.</li></ul></div>
+        <div class="box"><h3>Fontes</h3>
+          <p>Portal (dados abertos): <b>${(DADOS.portal.total||0).toLocaleString("pt-BR")}</b> proposições · atualizado ${fmtDH(DADOS.portal.atualizado)} <button class="btn" id="btnPortal" style="margin-left:6px">Atualizar agora</button></p>
+          <p>Silegis: <b>${(DADOS.silegis.total||0).toLocaleString("pt-BR")}</b> proposições · atualizado ${fmtDH(DADOS.silegis.atualizado)}${DADOS.silegis.quem?" por "+esc(DADOS.silegis.quem):""}</p>
+          <p class="mut" style="font-size:12px;margin-top:10px">O Silegis só abre na rede da ALMG. Para atualizar, arraste o botão abaixo para a barra de favoritos, abra o Silegis e clique nele.</p>
+          <p><a class="bm" href="${esc(bm)}" onclick="event.preventDefault();toast('Arraste para a barra de favoritos')">↻ Silegis → Arquivamento</a></p></div>
+      </div>
+    </div></div>`;
+  const bp = $("#btnPortal"); if (bp) bp.onclick = async ()=>{ bp.disabled=true; bp.textContent="Atualizando…"; try{ const r=await fetch(API+"/portal/atualizar",{method:"POST"}); const j=await r.json(); if(!r.ok) throw new Error(j.erro); toast(`Portal atualizado: ${j.total} proposições`); await carregar(); }catch(e){ toast("Falhou: "+(e.message||"erro")); bp.disabled=false; bp.textContent="Atualizar agora"; } };
+}
+function renderDep(){
+  const qq = norm(Q);
+  const L = DEPS.filter(d=>!qq || norm(d.nome).includes(qq));
+  $("#count").innerHTML = `<b>${L.filter(d=>d.reel).length}</b> reeleitos entre ${L.length} autores`;
+  $("#sheet").innerHTML = `<table class="g" style="width:${46+260+130+120+120}px"><colgroup><col style="width:46px"><col style="width:260px"><col style="width:130px"><col style="width:120px"><col style="width:120px"></colgroup>
+  <thead><tr class="letters"><th class="rn"></th><th>A</th><th>B</th><th>C</th><th>D</th></tr><tr class="heads"><th class="rn">#</th><th>Nome parlamentar</th><th>Reeleito?</th><th>Proposições</th><th>A arquivar</th></tr></thead><tbody>
+  ${L.map((d,i)=>`<tr><td class="rn">${i+1}</td><td>${esc(d.nome.replace(/^Deputad[oa] /,""))}</td><td class="ed" data-dep="${esc(d.nome)}">${d.reel?`<span class="pill p-nao${d.man?" p-man":""}">REELEITO</span>`:`<span class="pill p-sim${d.man?" p-man":""}">NÃO</span>`}</td><td>${d.n}</td><td>${d.arq}</td></tr>`).join("")}</tbody></table>`;
+}
+function bookmarklet(){
+  const code = `(async()=>{const W=${JSON.stringify(API)};if(!/silegis\\.almg\\.gov\\.br/.test(location.host)){alert('Abra o Silegis e clique de novo.');return}const B='/silegismg/sigad/api/unidades-arquivamento-indexadas/v1/?consulta='+encodeURIComponent('emTramitacao:true')+'&representacao=SIGAD&ordenar=-id&sintaxe=LUCENE_EXTENDIDO&paginaTamanho=1000&idRolagem=';const c=x=>({t:(x.identificadorProposicao||{}).proposicaoTipo,n:(x.identificadorProposicao||{}).proposicaoNumero,a:(x.identificadorProposicao||{}).proposicaoAno,sit:(x.situacao||{}).sigla||'',sitd:(x.situacao||{}).descricao||'',loc:x.localTramitacaoAtual||x.localAtual||'',aut:(x.autores||[]).map(a=>[a.tipoAutor,a.nome]),rel:(x.relacionamentos||[]).map(r=>[r.tipoRelacionamento,r.identificacao]),dp:(x.dataProtocolo||'').slice(0,10),em:String(x.ementaOuAssuntoPublicacaoPortal||x.ementaOuAssunto||'').slice(0,140)});let all=[],r0='';const d=document.createElement('div');d.style.cssText='position:fixed;z-index:99999;top:16px;right:16px;background:#123b36;color:#fff;padding:10px 14px;border-radius:10px;font:13px sans-serif';document.body.appendChild(d);try{for(;;){d.textContent='Lendo o Silegis… '+all.length;const r=await fetch(B+encodeURIComponent(r0),{credentials:'include'});if(!r.ok)throw new Error('Silegis '+r.status);const j=await r.json();all.push(...j.map(c));r0=r.headers.get('x-almg-idrolagem');if(!j.length||!r0)break}d.textContent='Enviando '+all.length+'…';const q=(JSON.parse(localStorage.getItem('arq:quem')||'""'))||prompt('Seu nome:')||'';const s=await fetch(W+'/silegis',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({itens:all.filter(x=>x.t),quem:q})});const k=await s.json();if(!s.ok)throw new Error(k.erro||s.status);d.textContent='✓ Silegis enviado: '+k.total+' proposições';setTimeout(()=>d.remove(),5000)}catch(e){d.style.background='#6e0d17';d.textContent='Falhou: '+e.message;setTimeout(()=>d.remove(),8000)}})()`;
+  return "javascript:"+encodeURIComponent(code);
+}
+
+/* ---------- Abas e navegação ---------- */
+function renderAbas(){
+  const n = id => id==="VER" ? ITENS.filter(x=>x.dec.d==="VERIFICAR").length : id==="DIV" ? ITENS.filter(x=>x.cruz!=="OK").length : id==="DEP" ? DEPS.length : id==="RES" ? "" : ITENS.filter(x=>x.aba===id).length;
+  $("#tabs").innerHTML = ABAS.map(a=> a.gap ? `<span class="gap"></span>` : (a.id!=="RES"&&a.id!=="DEP"&&a.id!=="VER"&&a.id!=="DIV"&&!n(a.id)) ? "" :
+    `<button class="tab${ABA===a.id?" on":""}" data-a="${a.id}" style="--c:${a.c}"><span class="dot"></span>${esc(a.nome||a.id)}${n(a.id)!==""?` <span class="n">${Number(n(a.id)).toLocaleString("pt-BR")}</span>`:""}</button>`).join("");
+}
+$("#tabs").addEventListener("click", e=>{ const b=e.target.closest(".tab"); if(b) irPara(b.dataset.a); });
+function irPara(aba, farq){
+  ABA = aba; lsSet("arq:aba", aba); if (farq!==undefined){ FARQ=farq; segOn("#fArq",FARQ); }
+  $("#sheet").scrollTop = 0; render();
+}
+function chips(){
+  const fc = FCOL[ABA]||{}; const out=[];
+  for (const cid in fc){ const col=COLS.find(c=>c.id===cid); const s=[...fc[cid]]; out.push(`<span class="chip">${esc(col.h)}: ${esc(s.slice(0,2).join(", "))}${s.length>2?" +"+(s.length-2):""}<button data-c="${cid}" title="Remover filtro">×</button></span>`); }
+  $("#chips").innerHTML = out.join("");
+}
+$("#chips").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; delete (FCOL[ABA]||{})[b.dataset.c]; chips(); renderGrade(); });
+function segOn(sel, v){ document.querySelectorAll(sel+" button").forEach(b=>b.classList.toggle("on", b.dataset.v===v)); }
+$("#fArq").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; FARQ=b.dataset.v; segOn("#fArq",FARQ); render(); });
+$("#fImp").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; FIMP=b.dataset.v; segOn("#fImp",FIMP); render(); });
+let qT; $("#q").addEventListener("input", e=>{ clearTimeout(qT); qT=setTimeout(()=>{ Q=e.target.value; render(); },160); });
+$("#quem").value = QUEM;
+$("#quem").addEventListener("change", e=>{ QUEM = e.target.value.trim().toUpperCase(); e.target.value=QUEM; lsSet("arq:quem",QUEM); render(); });
+$("#csv").addEventListener("click", ()=>{
+  if (ABA==="RES"||ABA==="DEP") return toast("Abra uma aba de proposições");
+  const cols = COLS; const linhas = [cols.map(c=>c.h)].concat(VIS.map(x=>cols.map(c=>c.v(x))));
+  const csv = "﻿"+linhas.map(l=>l.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(";")).join("\r\n");
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download=`arquivamento-${ABA}.csv`; a.click();
+});
+function render(){
+  document.querySelectorAll("#tools .seg, #tools .lbl, #csv").forEach(el=>el.style.display = (ABA==="RES"||ABA==="DEP") ? "none" : "");
+  renderAbas(); chips();
+  if (ABA==="RES") renderResumo(); else if (ABA==="DEP") renderDep(); else renderGrade();
+  const st = $("#status"); if (DADOS) st.innerHTML = `Portal <b>${fmtDH(DADOS.portal.atualizado)}</b> · Silegis <b>${fmtDH(DADOS.silegis.atualizado)}</b>`;
+}
+
+/* ---------- Carga ---------- */
+async function carregar(){
+  const [d, m] = await Promise.all([ fetch(API+"/dados",{cache:"no-store"}).then(r=>r.json()), fetch(API+"/marcas",{cache:"no-store"}).then(r=>r.json()) ]);
+  DADOS = d; MARCAS = new Map();
+  for (const x of (m.marcas||[])) setLocal(x.chave, x.campo, x.valor, x.quem, x.em);
+  if (!ABAS.some(a=>a.id===ABA)) ABA="RES";
+  montar(); render();
+}
+async function sincronizarMarcas(){
+  try { const m = await fetch(API+"/marcas",{cache:"no-store"}).then(r=>r.json()); MARCAS = new Map(); for (const x of (m.marcas||[])) setLocal(x.chave,x.campo,x.valor,x.quem,x.em);
+    const top=$("#sheet").scrollTop; reavaliar(); if (!POP){ render(); $("#sheet").scrollTop=top; if(RENDER) RENDER(); } } catch(e){}
+}
+carregar().then(()=>{ $("#load").remove(); setInterval(()=>{ if(!document.hidden) sincronizarMarcas(); }, 45000); })
+  .catch(e=>{ $("#load").innerHTML = `<div style="text-align:center;max-width:420px;padding:20px">Não foi possível carregar a listagem.<br><span style="font-size:12px">${esc(e.message||e)}</span><br><br><button class="btn" onclick="location.reload()">Tentar de novo</button></div>`; });
+</script>
+</body>
+</html>
