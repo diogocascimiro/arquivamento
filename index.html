@@ -144,7 +144,7 @@ table.s{border-collapse:collapse;width:100%;font-size:12.5px;margin-bottom:24px;
 .box h3{margin:0 0 8px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--green)}
 .box p,.box li{color:#3b4240;margin:4px 0}
 .box ul{margin:4px 0;padding-left:18px}
-.box ul.lg{list-style:none;padding-left:0} .box ul.lg li{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap} .box ul.lg i{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.15);flex:none;transform:translateY(1px)}
+.box ul.lg{list-style:none;padding-left:0} .box ul.lg li{display:grid;grid-template-columns:12px 1fr;column-gap:9px;align-items:start;margin:5px 0} .box ul.lg i{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.15);margin-top:4px} .box ul.lg li .mut{display:block;font-size:12px} .box ul.lg li.pl{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:9px} .box ul.lg li.pl .mut{display:inline}
 .bm{display:inline-block;padding:6px 12px;border-radius:8px;background:var(--amber);color:#fff;text-decoration:none;font-weight:600;cursor:grab}
 .toast{position:fixed;left:50%;bottom:58px;transform:translateX(-50%);background:var(--green);color:#fff;padding:8px 14px;border-radius:9px;font-size:12.5px;z-index:60;box-shadow:0 10px 30px -10px rgba(0,0,0,.4);opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
@@ -507,6 +507,17 @@ function renderResumo(){
           <tr class="tot"><td>TOTAL</td><td>${[...porPessoa.values()].reduce((a,b)=>a+b,0)}</td></tr></tbody></table>
         <table class="s"><thead><tr><th>Conferência</th><th>Proposições</th></tr></thead><tbody>
           ${porConf.size?[...porConf].sort((a,b)=>b[1]-a[1]).map(([q,n])=>`<tr><td>${esc(q)}</td><td>${n}</td></tr>`).join(""):`<tr><td class="mut">Nenhuma conferência marcada ainda</td><td></td></tr>`}</tbody></table>
+        <div class="box"><h3>Legenda das cores</h3><ul class="lg">
+          <li><i style="background:#c9daf8"></i><span><b>Proposição</b>: com os ícones do Silegis e do portal ao lado.</span></li>
+          <li><i style="background:#f4cccc"></i><span><b>Autoria em vermelho</b>: nenhum autor foi reeleito. <span class="mut">Em branco: há autor reeleito (o requerimento arquiva mesmo assim).</span></span></li>
+          <li><i style="background:#f9d5ae"></i><span><b>Autoria em laranja</b>: arquiva só pelo § 2º, por ter sido recebida até 31/01/2019.</span></li>
+          <li><i style="background:#e3e3e3"></i><span><b>Cinza</b>: campo sem informação (sem autoria ou sem anexação).</span></li>
+          <li><i style="background:#fce5cd"></i><span><b>Situação e local</b>: onde a proposição está hoje.</span></li>
+          <li><i style="background:#d9ead3"></i><span><b>Anexação em verde</b>: anexada a outra ou com anexadas.</span></li>
+          <li><i style="background:#4a4a4a"></i><span><b>Trecho escuro</b>: implantação marcada; Implantação, Conferência e Recolhido escurecem.</span></li>
+          <li><i style="background:#7a1414"></i><span><b>Cabeçalho vinho</b>: colunas de trabalho da equipe (preenchidas no site).</span></li>
+          <li class="pl"><span class="pill p-sim">ARQUIVA</span><span class="pill p-ver">AGDPR</span><span class="mut">Contorno tracejado: decisão marcada à mão.</span></li>
+        </ul></div>
       </div>
       <div>
         <div class="box"><h3>Regra aplicada</h3><ul>
@@ -516,17 +527,6 @@ function renderResumo(){
           <li><b>PEC</b> arquiva se os autores reeleitos forem menos de 1/3 da Assembleia, ou seja, menos de 26 (DNP 26, 1).</li>
           <li><b>§ 2º:</b> as exceções dos incisos I a IV arquivam se a proposição foi recebida até a 18ª Legislatura (até 31/01/2019).</li>
           <li><b>AGDPR (aguardando decisão da Presidência):</b> principal que arquiva com anexadas que não arquivam; as anexadas continuam tramitando do ponto em que estavam ao serem anexadas, salvo se forem reanexadas a proposição semelhante (DNP 26, 2). A decisão é marcada na aba AGDPR.</li></ul></div>
-        <div class="box"><h3>Legenda das cores</h3><ul class="lg">
-          <li><i style="background:#c9daf8"></i><b>Proposição</b>: com os ícones do Silegis e do portal ao lado.</li>
-          <li><i style="background:#f4cccc"></i><b>Autoria em vermelho</b>: nenhum autor foi reeleito. <span class="mut">Em branco: há autor reeleito (o requerimento arquiva mesmo assim).</span></li>
-          <li><i style="background:#f9d5ae"></i><b>Autoria em laranja</b>: arquiva só pelo § 2º, por ter sido recebida até 31/01/2019.</li>
-          <li><i style="background:#e3e3e3"></i><b>Cinza</b>: campo sem informação (sem autoria ou sem anexação).</li>
-          <li><i style="background:#fce5cd"></i><b>Situação e local</b>: onde a proposição está hoje.</li>
-          <li><i style="background:#d9ead3"></i><b>Anexação em verde</b>: anexada a outra ou com anexadas.</li>
-          <li><i style="background:#4a4a4a"></i><b>Trecho escuro</b>: implantação marcada; Implantação, Conferência e Recolhido escurecem.</li>
-          <li><i style="background:#7a1414"></i><b>Cabeçalho vinho</b>: colunas de trabalho da equipe (preenchidas no site).</li>
-          <li><span class="pill p-sim">ARQUIVA</span> <span class="pill p-ver">AGDPR</span> <span class="mut">Contorno tracejado: decisão marcada à mão.</span></li>
-        </ul></div>
         <div class="box"><h3>Fonte dos dados</h3>
           <p>Portal (dados abertos): <b>${(DADOS.portal.total||0).toLocaleString("pt-BR")}</b> proposições · atualizado ${fmtDH(DADOS.portal.atualizado)} <button class="btn" id="btnPortal" style="margin-left:6px">Atualizar agora</button></p>
           <p class="mut" style="font-size:12px;margin-top:8px">Todos os dados vêm de fontes públicas da ALMG: dados abertos (lista, autoria, situação, local e histórico de tramitação, de onde se lê a anexação), portal e lista de eleitos de 4/10/2026. O ícone do Silegis é só um atalho para quem tem acesso abrir a proposição lá.</p></div>
