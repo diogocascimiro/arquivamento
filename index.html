@@ -194,7 +194,6 @@ const ABAS = [
   {id:"MSG", c:"#3d85c6"},{id:"IND", c:"#3d85c6"},{id:"OFI", c:"#4a86e8"},{id:"RPR", c:"#4a86e8"},{id:"PLE", c:"#4a86e8"},{id:"OTC", c:"#4a86e8"},
   {id:"OUTROS", c:"#7a9cc6"},
   {gap:true},
-  {id:"DIV", nome:"PORTAL × SILEGIS", c:"#6e0d17"},
   {id:"DEP", c:"#5d625f"},
 ];
 const TIPOS_ABA = new Set(["PL","PLC","PEC","PRE","RQN","RQC","RQO","MSG","IND","OFI","RPR","PLE","OTC"]);
@@ -244,7 +243,7 @@ function avaliar(x){
   if (/diretrizes (para a elabora|or[cç]ament)|lei or[cç]ament[aá]ria anual|estima as receitas e fixa as despesas|plano plurianual|ppag/i.test(x.em) && aut.some(a=>/governador/i.test(a.tipo+a.nome)))
     return ex("§ 1º, II","LDO, LOA ou PPAG");
   if (/contas (do governador|anuais do governador|do tribunal de contas)|presta[cç][aã]o de contas do governador/i.test(x.em)) return {d:"NÃO", m:"Contas do Governador ou do TCE", r:"§ 1º, VI"};
-  // RQC: desde a Resolução 5.511/2015 nenhum foi arquivado no fim da legislatura (0 em 2019 e 0 em 2023, no Silegis)
+  // RQC: desde a Resolução 5.511/2015 nenhum foi arquivado no fim da legislatura (0 em 2019 e 0 em 2023, nos dados abertos)
   if (t==="RQC") return {d:"NÃO", m:"RQC não é arquivado no fim da legislatura (prática desde 2019)", r:"prática"};
   if (/^RQ/.test(t)) return {d:"SIM", m: reel.length ? "Requerimento (arquiva mesmo de reeleito)" : "Requerimento", r:"§ 1º, I"};
   if (t==="PEC" && deps.length){
@@ -257,13 +256,13 @@ function avaliar(x){
   return {d:"SIM", m:"Autoria: "+quem, r:"art. 180"};
 }
 
-/* ---------- Junta portal e Silegis ---------- */
+/* ---------- Monta a lista (dados abertos da ALMG) ---------- */
 const chave = (t,n,a) => `${String(t).replace(/\.$/,"")} ${n} ${a}`;
-// O Silegis escreve as relações de dois jeitos: "RQN 123/2026" ou "Projeto de Lei nº 1.128/2003"
+// Referências aparecem como "PLE 10 2023", "RQN 123/2026" ou "Projeto de Lei nº 1.128/2003"
 const NOMES = [["proposta de emenda a constituicao","PEC"],["projeto de lei complementar","PLC"],["projeto de lei","PL"],["projeto de lei ordinaria","PL"],["projeto de resolucao","PRE"],["proposta de acao legislativa","PLE"],["relatorio de evento institucional","REI"],["requerimento de comissao","RQC"],["requerimento em comissao","RQC"],["requerimento ordinario","RQO"],["requerimento em plenario","RQN"],["requerimento","RQN"],["mensagem","MSG"],["veto","VET"],["oficio","OFI"],["indicacao","IND"],["representacao","RPR"],["representacao de deputado","RPR"],["requerimento sem numero","RQS"],["oficio do tribunal de contas","OTC"],["oficio do tribunal de justica","OTJ"],["oficio da procuradoria-geral de justica","OPJ"],["oficio do governador do estado","OFC"]];
 function parseId(s){
   s = String(s).trim();
-  let m = s.match(/^([A-Z]{2,4})\.?\s*(?:n[ºo°]\s*)?([\d.]+)\s*\/\s*(\d{4})/);
+  let m = s.match(/^([A-Z]{2,4})\.?\s*(?:n[ºo°]\s*)?([\d.]+)[\s/]+(\d{4})/);
   if (m) return chave(m[1], +m[2].replace(/\./g,""), +m[3]);
   m = s.match(/^(.+?)\s+n[ºo°]\.?\s*([\d.]+)\s*\/\s*(\d{4})/i);
   if (m){ const nm = norm(m[1]); const hit = NOMES.find(([k])=>k===nm); if (hit) return chave(hit[1], +m[2].replace(/\./g,""), +m[3]); }
@@ -271,27 +270,19 @@ function parseId(s){
 }
 const tipoDe = s => { const k = parseId(s); return k ? k.split(" ")[0] : ""; };
 function montar(){
-  const P = new Map(), S = new Map();
-  for (const x of DADOS.portal.itens||[]) P.set(chave(x.t,x.n,x.a), x);
-  for (const x of DADOS.silegis.itens||[]) S.set(chave(x.t,x.n,x.a), x);
-  const keys = new Set([...P.keys(), ...S.keys()]);
+  // Só dados públicos: lista, autoria, situação, local, anexação e origem vêm dos dados abertos da ALMG
   ITENS = []; POR_CHAVE = new Map();
-  for (const k of keys){
-    const p = P.get(k), s = S.get(k);
-    const [t,n,a] = k.split(" ");
-    const aut = s ? s.aut.map(([tp,nm])=>({tipo:tipoAutor(nm,tp), nome:nm})) : (p.aut||[]).map(nm=>({tipo:tipoAutor(nm), nome:nm}));
-    const rel = s ? s.rel : [];
-    const anexadaA = rel.filter(r=>/^anexad[oa] a/i.test(r[0])).map(r=>parseId(r[1])).filter(Boolean);
-    const anexos = rel.filter(r=>/possui como anexo/i.test(r[0])).map(r=>parseId(r[1])).filter(Boolean);
-    let cruz = "OK";
-    if (!p) cruz = "Só no Silegis"; else if (!s) cruz = "Só no portal";
-    else if ((p.sit||"") !== (s.sit||"")) cruz = "Situação ≠";
-    const x = { k, t, n:+n, a:+a, aut, rel, anexadaA, anexos,
-      sit: (s&&s.sitd) || (p&&p.sitd) || "", sitS: s&&s.sitd||"", sitP: p&&p.sitd||"", sigS:s&&s.sit||"", sigP:p&&p.sit||"",
-      loc: (s&&s.loc) || (p&&p.loc) || "", dp: (s&&s.dp) || (p&&p.dp) || "", em: (s&&s.em) || (p&&p.em) || "", cruz,
+  for (const p of DADOS.portal.itens||[]){
+    const k = chave(p.t,p.n,p.a), [t,n,a] = k.split(" ");
+    if (POR_CHAVE.has(k)) continue;
+    const aut = (p.aut||[]).map(nm=>({tipo:tipoAutor(nm), nome:nm}));
+    const rel = (p.orig||[]).map(o=>["Proposição originada de", o]);
+    const x = { k, t, n:+n, a:+a, aut, rel, anexadaA: p.anx ? [p.anx] : [], anexos: [],
+      sit: p.sitd||"", sig: p.sit||"", loc: p.loc||"", dp: p.dp||"", em: p.em||"",
       aba: TIPOS_ABA.has(t) ? t : "OUTROS" };
     ITENS.push(x); POR_CHAVE.set(k, x);
   }
+  for (const x of ITENS) for (const pk of x.anexadaA){ const p = POR_CHAVE.get(pk); if (p) p.anexos.push(x.k); }
   ITENS.sort((u,v)=> u.t.localeCompare(v.t) || u.a-v.a || u.n-v.n);
   reavaliar();
 }
@@ -348,7 +339,6 @@ const COLS = [
   {id:"loc", h:"Local", w:200, cls:()=>"c-sit", v:x=>x.loc, html:x=>`<span title="${esc(x.loc)}">${esc(x.loc)}</span>`},
   {id:"anx", h:"Anexação", w:150, cls:x=> x.anexadaA.length||x.anexos.length ? "c-anx" : "c-vaz", v:x=>x.anexadaA.length?"Anexada a "+x.anexadaA.join(", "):(x.anexos.length?x.anexos.length+" anexada"+(x.anexos.length>1?"s":""):""), html:x=> x.anexadaA.length?`<span class="mut">à</span> ${esc(x.anexadaA.join(", "))}`:(x.anexos.length?`<span class="mut" title="${esc(x.anexos.join(", "))}">${x.anexos.length} anexada${x.anexos.length>1?"s":""}</span>`:""), fv:x=>x.anexadaA.length?"Anexada":(x.anexos.length?"Tem anexadas":"Sem anexação")},
   {id:"ano", h:"Ano", w:58, v:x=>String(x.a), html:x=>`<span class="mut">${x.a}</span>`},
-  {id:"cruz", h:"Portal × Silegis", w:150, v:x=>x.cruz, html:x=>`<span class="${x.cruz==="OK"?"x-ok":/^Só/.test(x.cruz)?"x-so":"x-dif"}" title="${esc(x.cruz==="Situação ≠"?("Portal: "+x.sitP+" | Silegis: "+x.sitS):x.cruz)}">${x.cruz==="OK"?"✓ confere":esc(x.cruz)}</span>`},
   {id:"imp", h:"Implantação", w:112, v:x=>quemCell(x,"imp")||"(pendente)", html:x=>quemCell(x,"imp")||`<span class="ph">—</span>`, ed:"imp"},
   {id:"conf", h:"Conferência", w:112, v:x=>quemCell(x,"conf")||"(pendente)", html:x=>quemCell(x,"conf")||`<span class="ph">—</span>`, ed:"conf"},
   {id:"rec", h:"Recolhido?", w:118, v:x=>marca(x.k,"rec")||"(vazio)", html:x=>marca(x.k,"rec")||`<span class="ph">—</span>`, ed:"rec"},
@@ -371,12 +361,10 @@ function filtrar(lista, aba){
   });
 }
 // A lista é só o que vai para o arquivo (ou precisa de verificação). O que fica tramitando não aparece.
-// Itens que só existem no Silegis (ex.: mensagens de 1995–2004 ainda "Recebida") ficam na aba PORTAL × SILEGIS.
 const naLista = x => x.dec.d!=="NÃO" || !!x.dec.man;
-const listaBase = () => ITENS.filter(x=>naLista(x) && x.cruz!=="Só no Silegis");
+const listaBase = () => ITENS.filter(naLista);
 function listaDaAba(aba){
   if (aba==="VER") return ITENS.filter(x=>x.dec.d==="VERIFICAR" || (x.dec.man && x.ver));
-  if (aba==="DIV") return ITENS.filter(x=>naLista(x) && x.cruz!=="OK");
   return listaBase().filter(x=>x.aba===aba);
 }
 
@@ -494,10 +482,9 @@ function renderResumo(){
   const tot = linha(BASE);
   const porPessoa = new Map(); for (const x of BASE){ const q=quemCell(x,"imp"); if(q) porPessoa.set(q,(porPessoa.get(q)||0)+1); }
   const porConf = new Map(); for (const x of BASE){ const q=quemCell(x,"conf"); if(q) porConf.set(q,(porConf.get(q)||0)+1); }
-  const div = ITENS.filter(x=>naLista(x) && x.cruz!=="OK"); const dc = c => div.filter(x=>x.cruz===c).length;
+
   const fica = ITENS.filter(x=>!naLista(x)).length;
   const pct = (a,b) => b ? Math.round(a/b*100) : 0;
-  const bm = bookmarklet();
   $("#count").innerHTML = "";
   $("#sheet").innerHTML = `<div class="wrap">
     <h2>Arquivamento ao final da 20ª Legislatura</h2>
@@ -520,11 +507,6 @@ function renderResumo(){
           <tr class="tot"><td>TOTAL</td><td>${[...porPessoa.values()].reduce((a,b)=>a+b,0)}</td></tr></tbody></table>
         <table class="s"><thead><tr><th>Conferência</th><th>Proposições</th></tr></thead><tbody>
           ${porConf.size?[...porConf].sort((a,b)=>b[1]-a[1]).map(([q,n])=>`<tr><td>${esc(q)}</td><td>${n}</td></tr>`).join(""):`<tr><td class="mut">Nenhuma conferência marcada ainda</td><td></td></tr>`}</tbody></table>
-        <table class="s"><thead><tr><th>Portal × Silegis</th><th>Proposições</th></tr></thead><tbody>
-          <tr><td>Conferem</td><td>${(tot.n-dc("Situação ≠")-dc("Só no portal")).toLocaleString("pt-BR")}</td></tr>
-          <tr><td><a data-go="DIV">Situação diferente</a></td><td>${dc("Situação ≠")}</td></tr>
-          <tr><td><a data-go="DIV">Só no Silegis</a></td><td>${dc("Só no Silegis")}</td></tr>
-          <tr><td><a data-go="DIV">Só no portal</a></td><td>${dc("Só no portal")}</td></tr></tbody></table>
       </div>
       <div>
         <div class="box"><h3>Regra aplicada</h3><ul>
@@ -545,11 +527,9 @@ function renderResumo(){
           <li><i style="background:#7a1414"></i><b>Cabeçalho vinho</b>: colunas de trabalho da equipe (preenchidas no site).</li>
           <li><span class="pill p-sim">ARQUIVA</span> <span class="pill p-ver">AGDPR</span> <span class="mut">Contorno tracejado: decisão marcada à mão.</span></li>
         </ul></div>
-        <div class="box"><h3>Fontes</h3>
+        <div class="box"><h3>Fonte dos dados</h3>
           <p>Portal (dados abertos): <b>${(DADOS.portal.total||0).toLocaleString("pt-BR")}</b> proposições · atualizado ${fmtDH(DADOS.portal.atualizado)} <button class="btn" id="btnPortal" style="margin-left:6px">Atualizar agora</button></p>
-          <p>Silegis: <b>${(DADOS.silegis.total||0).toLocaleString("pt-BR")}</b> proposições · atualizado ${fmtDH(DADOS.silegis.atualizado)}${DADOS.silegis.quem?" por "+esc(DADOS.silegis.quem):""}</p>
-          <p class="mut" style="font-size:12px;margin-top:10px">O Silegis só abre na rede da ALMG. Para atualizar, arraste o botão abaixo para a barra de favoritos, abra o Silegis e clique nele.</p>
-          <p><a class="bm" href="${esc(bm)}" onclick="event.preventDefault();toast('Arraste para a barra de favoritos')">↻ Silegis → Arquivamento</a></p></div>
+          <p class="mut" style="font-size:12px;margin-top:8px">Todos os dados vêm de fontes públicas da ALMG: dados abertos (lista, autoria, situação, local e histórico de tramitação, de onde se lê a anexação), portal e lista de eleitos de 4/10/2026. O ícone do Silegis é só um atalho para quem tem acesso abrir a proposição lá.</p></div>
       </div>
     </div></div>`;
   const bp = $("#btnPortal"); if (bp) bp.onclick = async ()=>{ bp.disabled=true; bp.textContent="Atualizando…"; try{ const r=await fetch(API+"/portal/atualizar",{method:"POST"}); const j=await r.json(); if(!r.ok) throw new Error(j.erro); toast(`Portal atualizado: ${j.total} proposições`); await carregar(); }catch(e){ toast("Falhou: "+(e.message||"erro")); bp.disabled=false; bp.textContent="Atualizar agora"; } };
@@ -584,15 +564,11 @@ function renderDep(){
   <thead><tr class="letters"><th class="rn"></th><th>A</th><th>B</th><th>C</th><th>D</th></tr><tr class="heads"><th class="rn">#</th><th>Nome parlamentar</th><th>Reeleito?</th><th>Proposições</th><th>A arquivar</th></tr></thead><tbody>
   ${L.map((d,i)=>`<tr><td class="rn">${i+1}</td><td>${esc(d.nome.replace(/^Deputad[oa] /,""))}</td><td class="ed" data-dep="${esc(d.nome)}">${d.reel?`<span class="pill p-nao${d.man?" p-man":""}">REELEITO</span>`:`<span class="pill p-sim${d.man?" p-man":""}">NÃO</span>`}</td><td>${d.n}</td><td>${d.arq}</td></tr>`).join("")}</tbody></table>`;
 }
-function bookmarklet(){
-  const code = `(async()=>{const W=${JSON.stringify(API)};if(!/silegis\\.almg\\.gov\\.br/.test(location.host)){alert('Abra o Silegis e clique de novo.');return}const B='/silegismg/sigad/api/unidades-arquivamento-indexadas/v1/?consulta='+encodeURIComponent('emTramitacao:true')+'&representacao=SIGAD&ordenar=-id&sintaxe=LUCENE_EXTENDIDO&paginaTamanho=1000&idRolagem=';const c=x=>({t:(x.identificadorProposicao||{}).proposicaoTipo,n:(x.identificadorProposicao||{}).proposicaoNumero,a:(x.identificadorProposicao||{}).proposicaoAno,sit:(x.situacao||{}).sigla||'',sitd:(x.situacao||{}).descricao||'',loc:x.localTramitacaoAtual||x.localAtual||'',aut:(x.autores||[]).map(a=>[a.tipoAutor,a.nome]),rel:(x.relacionamentos||[]).map(r=>[r.tipoRelacionamento,r.identificacao]),dp:(x.dataProtocolo||'').slice(0,10),em:String(x.ementaOuAssuntoPublicacaoPortal||x.ementaOuAssunto||'').slice(0,140)});let all=[],r0='';const d=document.createElement('div');d.style.cssText='position:fixed;z-index:99999;top:16px;right:16px;background:#123b36;color:#fff;padding:10px 14px;border-radius:10px;font:13px sans-serif';document.body.appendChild(d);try{for(;;){d.textContent='Lendo o Silegis… '+all.length;const r=await fetch(B+encodeURIComponent(r0),{credentials:'include'});if(!r.ok)throw new Error('Silegis '+r.status);const j=await r.json();all.push(...j.map(c));r0=r.headers.get('x-almg-idrolagem');if(!j.length||!r0)break}d.textContent='Enviando '+all.length+'…';const q=(JSON.parse(localStorage.getItem('arq:quem')||'""'))||prompt('Seu nome:')||'';const s=await fetch(W+'/silegis',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({itens:all.filter(x=>x.t),quem:q})});const k=await s.json();if(!s.ok)throw new Error(k.erro||s.status);d.textContent='✓ Silegis enviado: '+k.total+' proposições';setTimeout(()=>d.remove(),5000)}catch(e){d.style.background='#6e0d17';d.textContent='Falhou: '+e.message;setTimeout(()=>d.remove(),8000)}})()`;
-  return "javascript:"+encodeURIComponent(code);
-}
 
 /* ---------- Abas e navegação ---------- */
 function renderAbas(){
-  const n = id => id==="VER" ? gruposAgdpr().length : id==="DIV" ? ITENS.filter(x=>naLista(x) && x.cruz!=="OK").length : id==="DEP" ? DEPS.length : id==="RES" ? "" : listaBase().filter(x=>x.aba===id).length;
-  $("#tabs").innerHTML = ABAS.map(a=> a.gap ? `<span class="gap"></span>` : (a.id!=="RES"&&a.id!=="DEP"&&a.id!=="VER"&&a.id!=="DIV"&&!n(a.id)) ? "" :
+  const n = id => id==="VER" ? gruposAgdpr().length : id==="DEP" ? DEPS.length : id==="RES" ? "" : listaBase().filter(x=>x.aba===id).length;
+  $("#tabs").innerHTML = ABAS.map(a=> a.gap ? `<span class="gap"></span>` : (a.id!=="RES"&&a.id!=="DEP"&&a.id!=="VER"&&!n(a.id)) ? "" :
     `<button class="tab${ABA===a.id?" on":""}" data-a="${a.id}" style="--c:${a.c}"><span class="dot"></span>${esc(a.nome||a.id)}${n(a.id)!==""?` <span class="n">${Number(n(a.id)).toLocaleString("pt-BR")}</span>`:""}</button>`).join("");
 }
 $("#leg").addEventListener("click", ()=>irPara("RES"));
@@ -622,7 +598,7 @@ function render(){
   document.querySelectorAll("#tools .seg, #tools .lbl, #csv, #leg").forEach(el=>el.style.display = (ABA==="RES"||ABA==="DEP"||ABA==="VER") ? "none" : "");
   renderAbas(); chips();
   if (ABA==="RES") renderResumo(); else if (ABA==="DEP") renderDep(); else if (ABA==="VER") renderAgdpr(); else renderGrade();
-  const st = $("#status"); if (DADOS) st.innerHTML = `Portal <b>${fmtDH(DADOS.portal.atualizado)}</b> · Silegis <b>${fmtDH(DADOS.silegis.atualizado)}</b>`;
+  const st = $("#status"); if (DADOS) st.innerHTML = `Dados abertos da ALMG · <b>${fmtDH(DADOS.portal.atualizado)}</b>`;
 }
 
 /* ---------- Carga ---------- */
