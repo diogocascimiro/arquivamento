@@ -205,7 +205,7 @@ const lsGet = (k,d) => { try { const v=localStorage.getItem(k); return v==null?d
 const lsSet = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
 
 let DADOS = null, ITENS = [], POR_CHAVE = new Map(), MARCAS = new Map(), DEPS = [];
-let ABA = lsGet("arq:aba","RES"), Q = "", FARQ = "", FIMP = "", FCOL = {}; // FCOL[aba][col] = Set de valores
+let ABA = lsGet("arq:aba","RES"), Q = "", FARQ = "", FIMP = "", FCOL = {}, ORD = {}; // FCOL[aba][col] = Set de valores; ORD[aba] = {c, dir}
 let QUEM = lsGet("arq:quem","");
 
 /* ---------- Regras do art. 180 + DNP 26/2018 ---------- */
@@ -334,7 +334,7 @@ const pillDec = d => `<span class="pill ${d.d==="SIM"?"p-sim":d.d==="NÃO"?"p-na
 const autTxt = x => x.aut.map(a=>a.nome.replace(/^Deputad[oa] /,"Dep. ")).join("; ");
 const quemCell = (x,c) => { const o=marcaObj(x.k,c); return o ? o.valor : ""; };
 const COLS = [
-  {id:"pk", h:"Proposição", w:150, v:x=>x.k, html:x=>`${esc(x.k)}<span class="lk"><a href="${silegisURL(x)}" target="_blank" rel="noopener" title="Abrir no Silegis"><img src="https://silegis.almg.gov.br/silegismg/favicon.ico" alt="S" onerror="this.replaceWith('S')"></a><a href="${portalURL(x)}" target="_blank" rel="noopener" title="Abrir no portal da ALMG"><img src="https://www.almg.gov.br/favicon.ico" alt="A" onerror="this.replaceWith('A')"></a></span>`, filt:false},
+  {id:"pk", h:"Proposição", w:150, v:x=>x.k, sk:x=>x.t.padEnd(4," ")+String(x.a).padStart(4,"0")+String(x.n).padStart(6,"0"), html:x=>`${esc(x.k)}<span class="lk"><a href="${silegisURL(x)}" target="_blank" rel="noopener" title="Abrir no Silegis"><img src="https://silegis.almg.gov.br/silegismg/favicon.ico" alt="S" onerror="this.replaceWith('S')"></a><a href="${portalURL(x)}" target="_blank" rel="noopener" title="Abrir no portal da ALMG"><img src="https://www.almg.gov.br/favicon.ico" alt="A" onerror="this.replaceWith('A')"></a></span>`, filt:false},
   {id:"dec", h:"Arquiva?", w:118, v:x=>x.dec.d==="SIM"?"ARQUIVA":x.dec.d==="NÃO"?"NÃO ARQUIVA":"VERIFICAR", html:x=>pillDec(x.dec), ed:"decisao"},
   {id:"mot", h:"Fundamento", w:300, v:x=>x.dec.m, html:x=>`<span title="${esc(x.dec.m+" · "+x.dec.r)}">${esc(x.dec.m)}</span>`, filt:false},
   {id:"aut", h:"Autoria", w:230, cls:x=> /§ 2º/.test(x.dec.r)||/§ 2º/.test(x.dec.m) ? "c-old" : (!x.aut.length ? "c-vaz" : (!x.aut.some(a=>a.tipo==="Deputado"&&REEL.has(norm(a.nome))) ? "c-aut" : "")), v:x=>autTxt(x), html:x=>`<span title="${esc(autTxt(x))}">${esc(autTxt(x))}</span>`, fv:x=>x.aut.map(a=>a.nome.replace(/^Deputad[oa] /,"Dep. "))},
@@ -379,6 +379,8 @@ let VIS = [], RENDER = null;
 function renderGrade(){
   const aba = ABA, base = listaDaAba(aba);
   VIS = filtrar(base, aba);
+  const od = ORD[aba]; if (od){ const col = COLS.find(c=>c.id===od.c); const key = col.sk || col.v; const cmp = new Intl.Collator("pt-BR",{numeric:true,sensitivity:"base"}).compare;
+    VIS = VIS.map(x=>[String(key(x)??""), x]).sort((a,b)=> (a[0]===""?1:0)-(b[0]===""?1:0) || cmp(a[0],b[0])*od.dir).map(p=>p[1]); }
   const cols = aba==="VER" ? COLS.slice() : COLS;
   const fc = FCOL[aba] || {};
   const total = base.length, arq = VIS.filter(x=>x.dec.d==="SIM").length;
@@ -387,7 +389,7 @@ function renderGrade(){
   const sh = $("#sheet");
   sh.innerHTML = `<table class="g" style="width:${w}px"><colgroup><col style="width:46px">${cols.map(c=>`<col style="width:${c.w}px">`).join("")}</colgroup>
   <thead><tr class="letters"><th class="rn"></th>${cols.map((c,i)=>`<th class="${c.id==="pk"?"pk":""}">${LETRAS[i]}</th>`).join("")}</tr>
-  <tr class="heads"><th class="rn">#</th>${cols.map(c=>`<th class="${c.id==="pk"?"pk":""}${c.ed&&c.ed!=="decisao"?" hw":""}">${esc(c.h)}${c.filt===false?"":`<button class="fbtn${fc[c.id]&&fc[c.id].size?" on":""}" data-f="${c.id}" title="Filtrar">▾</button>`}</th>`).join("")}</tr></thead>
+  <tr class="heads"><th class="rn">#</th>${cols.map(c=>`<th class="${c.id==="pk"?"pk":""}${c.ed&&c.ed!=="decisao"?" hw":""}">${esc(c.h)}<button class="fbtn${(fc[c.id]&&fc[c.id].size)||(ORD[aba]&&ORD[aba].c===c.id)?" on":""}" data-f="${c.id}" title="Ordenar e filtrar">${ORD[aba]&&ORD[aba].c===c.id?(ORD[aba].dir>0?"▲":"▼"):"▾"}</button></th>`).join("")}</tr></thead>
   <tbody id="tb"></tbody></table>${VIS.length?"":`<div class="empty">Nenhuma proposição com esses filtros.</div>`}`;
   const tb = $("#tb"), RH = 28, BUF = 12;
   RENDER = () => {
@@ -419,14 +421,21 @@ function abrirPop(anchor, html){
   p.style.left=x+"px"; p.style.top=y+"px"; POP=p; return p;
 }
 function popFiltro(btn, cid){
-  const col = COLS.find(c=>c.id===cid), base = listaDaAba(ABA);
-  const cnt = new Map(); for (const x of base) for (const v of [].concat(col.fv?col.fv(x):col.v(x))) cnt.set(v,(cnt.get(v)||0)+1);
-  const vals = [...cnt.entries()].sort((a,b)=>b[1]-a[1]||String(a[0]).localeCompare(String(b[0])));
-  const cur = (FCOL[ABA]||{})[cid] || new Set();
-  const p = abrirPop(btn, `<h4>Filtrar: ${esc(col.h)}</h4><input type="text" placeholder="Procurar valor…"><div class="lst">${vals.map(([v,n])=>`<label data-v="${esc(v)}"><input type="checkbox" ${cur.has(v)?"checked":""}> <span>${esc(v)||"<i class=mut>(vazio)</i>"}</span><span class="c">${n}</span></label>`).join("")}</div><div class="row"><button class="btn" data-a="limpar">Limpar</button><button class="btn pri" data-a="ok">Aplicar</button></div>`);
-  const inp = p.querySelector("input[type=text]"); inp.focus();
-  inp.addEventListener("input", ()=>{ const q=norm(inp.value); p.querySelectorAll("label").forEach(l=>l.style.display=norm(l.dataset.v).includes(q)?"":"none"); });
-  p.addEventListener("click", e=>{ const a=e.target.closest("button")?.dataset.a; if(!a) return;
+  const col = COLS.find(c=>c.id===cid), base = listaDaAba(ABA), od = ORD[ABA];
+  const ordHtml = `<h4>Ordenar: ${esc(col.h)}</h4><button class="opt${od&&od.c===cid&&od.dir>0?" cur":""}" data-o="1">Ordenar A → Z</button><button class="opt${od&&od.c===cid&&od.dir<0?" cur":""}" data-o="-1">Ordenar Z → A</button>${od&&od.c===cid?`<button class="opt" data-o="0" style="color:var(--red)">Ordem original</button>`:""}`;
+  let filtHtml = "";
+  if (col.filt!==false){
+    const cnt = new Map(); for (const x of base) for (const v of [].concat(col.fv?col.fv(x):col.v(x))) cnt.set(v,(cnt.get(v)||0)+1);
+    const vals = [...cnt.entries()].sort((a,b)=>String(a[0]).localeCompare(String(b[0]),"pt-BR",{numeric:true}));
+    const cur = (FCOL[ABA]||{})[cid] || new Set();
+    filtHtml = `<div style="border-top:1px solid var(--line);margin:8px -8px 8px;"></div><h4>Filtrar</h4><input type="text" placeholder="Procurar valor…"><div class="lst">${vals.map(([v,n])=>`<label data-v="${esc(v)}"><input type="checkbox" ${cur.has(v)?"checked":""}> <span>${esc(v)||"<i class=mut>(vazio)</i>"}</span><span class="c">${n}</span></label>`).join("")}</div><div class="row"><button class="btn" data-a="limpar">Limpar</button><button class="btn pri" data-a="ok">Aplicar</button></div>`;
+  }
+  const p = abrirPop(btn, ordHtml + filtHtml);
+  const inp = p.querySelector("input[type=text]");
+  if (inp){ inp.focus(); inp.addEventListener("input", ()=>{ const q=norm(inp.value); p.querySelectorAll("label").forEach(l=>l.style.display=norm(l.dataset.v).includes(q)?"":"none"); }); }
+  p.addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return;
+    if (b.dataset.o!==undefined){ const d=+b.dataset.o; if (d) ORD[ABA]={c:cid, dir:d}; else delete ORD[ABA]; fecharPop(); $("#sheet").scrollTop=0; renderGrade(); return; }
+    const a=b.dataset.a; if(!a) return;
     FCOL[ABA] = FCOL[ABA] || {};
     if (a==="limpar") delete FCOL[ABA][cid];
     else { const s=new Set(); p.querySelectorAll("label").forEach(l=>{ if(l.querySelector("input").checked) s.add(l.dataset.v); }); if (s.size) FCOL[ABA][cid]=s; else delete FCOL[ABA][cid]; }
