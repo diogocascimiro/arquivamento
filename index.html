@@ -79,15 +79,18 @@ td.ed .ph{color:#b8bcb9}
 td.ed.done{color:var(--ok);font-weight:600;font-family:var(--f-mono);font-size:11.5px}
 td.ed.mine{background:#f1f8f4}
 /* Cores herdadas da planilha da 19ª, em tom suave */
-.g td.pk{background:#eef3fd} .g tbody tr:hover td.pk{background:#e3ebfb}
-.g td.c-aut{background:#fcf0f0} .g td.c-old{background:#fdf3e7} .g td.c-anx{background:#eef6ea}
+.g td.pk{background:#d9e5fa} .g tbody tr:hover td.pk{background:#cddcf7}
+.g td.c-aut{background:#f8dcdc} .g td.c-old{background:#fbe3c9} .g td.c-anx{background:#dcecd5} .g td.c-vaz{background:#efefef}
+.g td.c-sit{background:#fdeedd}
+.g tbody tr:hover td.c-aut{background:#f3cfcf} .g tbody tr:hover td.c-old{background:#f7d9b8} .g tbody tr:hover td.c-anx{background:#d0e5c7} .g tbody tr:hover td.c-sit{background:#fae4cb} .g tbody tr:hover td.c-vaz{background:#e8e8e8}
+.g thead tr.heads th{background:#e4e2dc}
 .g td.blk{background:#4a4a4a;color:#c9c9c9;box-shadow:inset 0 -1px 0 #5a5a5a} .g td.blk.done{color:#e6e6e6} .g td.blk .ph{color:#777}
 .g tbody tr:hover td.blk{background:#555}
 .g thead tr.heads th.hw{background:#7a1414;color:#fff;border-bottom-color:#5c0f0f} .g thead tr.heads th.hw .fbtn{color:#e8b4b4}
 .leg{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);flex-wrap:wrap}
 .leg i{width:11px;height:11px;border-radius:3px;border:1px solid rgba(0,0,0,.12);margin-left:7px}
 .leg i:first-child{margin-left:0}
-.leg .c-pk{background:#dbe6fb}.leg .c-aut{background:#f6d6d6}.leg .c-old{background:#f9dfbe}.leg .c-anx{background:#d6eacd}.leg .c-blk{background:#4a4a4a}
+.leg .c-pk{background:#d9e5fa}.leg .c-aut{background:#f8dcdc}.leg .c-old{background:#fbe3c9}.leg .c-sit{background:#fdeedd}.leg .c-anx{background:#dcecd5}.leg .c-blk{background:#4a4a4a}
 @media (max-width:1100px){.leg{display:none}}
 .mut{color:var(--muted)}
 .empty{padding:60px 20px;text-align:center;color:var(--muted)}
@@ -160,7 +163,7 @@ table.s{border-collapse:collapse;width:100%;font-size:12.5px;margin-bottom:24px;
   <span class="lbl">Implantação</span>
   <div class="seg" id="fImp"><button data-v="" class="on">Todas</button><button data-v="pend">Pendentes</button><button data-v="feita">Feitas</button><button data-v="mine">Minhas</button></div>
   <div class="chips" id="chips"></div>
-  <span class="leg" id="leg"><i class="c-pk"></i>Proposição<i class="c-aut"></i>Autor não reeleito<i class="c-old"></i>Recebida até 2018 (§ 2º)<i class="c-anx"></i>Anexação<i class="c-blk"></i>Implantada</span>
+  <span class="leg" id="leg"><i class="c-pk"></i>Proposição<i class="c-aut"></i>Autor não reeleito<i class="c-old"></i>Recebida até 2018 (§ 2º)<i class="c-sit"></i>Situação e local<i class="c-anx"></i>Anexação<i class="c-blk"></i>Implantada</span>
   <span class="count" id="count"></span>
   <button class="btn" id="csv" title="Baixar a aba filtrada em CSV"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 19h16"/></svg>CSV</button>
 </div>
@@ -332,10 +335,10 @@ const COLS = [
   {id:"pk", h:"Proposição", w:150, v:x=>x.k, html:x=>`<a href="${portalURL(x)}" target="_blank" rel="noopener">${esc(x.k)}</a><span class="lk"><a href="${silegisURL(x)}" target="_blank" rel="noopener" title="Abrir no Silegis">S</a></span>`, filt:false},
   {id:"dec", h:"Arquiva?", w:118, v:x=>x.dec.d==="SIM"?"ARQUIVA":x.dec.d==="NÃO"?"NÃO ARQUIVA":"VERIFICAR", html:x=>pillDec(x.dec), ed:"decisao"},
   {id:"mot", h:"Fundamento", w:300, v:x=>x.dec.m, html:x=>`<span title="${esc(x.dec.m+" · "+x.dec.r)}">${esc(x.dec.m)}</span>`, filt:false},
-  {id:"aut", h:"Autoria", w:230, cls:x=> /§ 2º/.test(x.dec.r)||/§ 2º/.test(x.dec.m) ? "c-old" : (x.aut.some(a=>a.tipo==="Deputado") && !x.aut.some(a=>a.tipo==="Deputado"&&REEL.has(norm(a.nome))) ? "c-aut" : ""), v:x=>autTxt(x), html:x=>`<span title="${esc(autTxt(x))}">${esc(autTxt(x))}</span>`, fv:x=>x.aut.map(a=>a.nome.replace(/^Deputad[oa] /,"Dep. "))},
-  {id:"sit", h:"Situação", w:230, v:x=>x.sit, html:x=>`<span title="${esc(x.sit)}">${esc(x.sit)}</span>`},
-  {id:"loc", h:"Local", w:200, v:x=>x.loc, html:x=>`<span title="${esc(x.loc)}">${esc(x.loc)}</span>`},
-  {id:"anx", h:"Anexação", w:150, cls:x=> x.anexadaA.length||x.anexos.length ? "c-anx" : "", v:x=>x.anexadaA.length?"Anexada a "+x.anexadaA.join(", "):(x.anexos.length?x.anexos.length+" anexada"+(x.anexos.length>1?"s":""):""), html:x=> x.anexadaA.length?`<span class="mut">à</span> ${esc(x.anexadaA.join(", "))}`:(x.anexos.length?`<span class="mut" title="${esc(x.anexos.join(", "))}">${x.anexos.length} anexada${x.anexos.length>1?"s":""}</span>`:""), fv:x=>x.anexadaA.length?"Anexada":(x.anexos.length?"Tem anexadas":"Sem anexação")},
+  {id:"aut", h:"Autoria", w:230, cls:x=> /§ 2º/.test(x.dec.r)||/§ 2º/.test(x.dec.m) ? "c-old" : (!x.aut.length ? "c-vaz" : (!x.aut.some(a=>a.tipo==="Deputado"&&REEL.has(norm(a.nome))) ? "c-aut" : "")), v:x=>autTxt(x), html:x=>`<span title="${esc(autTxt(x))}">${esc(autTxt(x))}</span>`, fv:x=>x.aut.map(a=>a.nome.replace(/^Deputad[oa] /,"Dep. "))},
+  {id:"sit", h:"Situação", w:230, cls:()=>"c-sit", v:x=>x.sit, html:x=>`<span title="${esc(x.sit)}">${esc(x.sit)}</span>`},
+  {id:"loc", h:"Local", w:200, cls:()=>"c-sit", v:x=>x.loc, html:x=>`<span title="${esc(x.loc)}">${esc(x.loc)}</span>`},
+  {id:"anx", h:"Anexação", w:150, cls:x=> x.anexadaA.length||x.anexos.length ? "c-anx" : "c-vaz", v:x=>x.anexadaA.length?"Anexada a "+x.anexadaA.join(", "):(x.anexos.length?x.anexos.length+" anexada"+(x.anexos.length>1?"s":""):""), html:x=> x.anexadaA.length?`<span class="mut">à</span> ${esc(x.anexadaA.join(", "))}`:(x.anexos.length?`<span class="mut" title="${esc(x.anexos.join(", "))}">${x.anexos.length} anexada${x.anexos.length>1?"s":""}</span>`:""), fv:x=>x.anexadaA.length?"Anexada":(x.anexos.length?"Tem anexadas":"Sem anexação")},
   {id:"ano", h:"Ano", w:58, v:x=>String(x.a), html:x=>`<span class="mut">${x.a}</span>`},
   {id:"cruz", h:"Portal × Silegis", w:150, v:x=>x.cruz, html:x=>`<span class="${x.cruz==="OK"?"x-ok":/^Só/.test(x.cruz)?"x-so":"x-dif"}" title="${esc(x.cruz==="Situação ≠"?("Portal: "+x.sitP+" | Silegis: "+x.sitS):x.cruz)}">${x.cruz==="OK"?"✓ confere":esc(x.cruz)}</span>`},
   {id:"imp", h:"Implantação", w:112, v:x=>quemCell(x,"imp")||"(pendente)", html:x=>quemCell(x,"imp")||`<span class="ph">—</span>`, ed:"imp"},
