@@ -218,7 +218,8 @@ function avaliar(x){
   if (t==="VET" || t==="IMP") return {d:"NÃO", m:"Veto ou matéria impugnada", r:"§ 1º, V"};
   if (aut.some(a=>a.tipo==="Autoria Popular")) return ex("§ 1º, III","Iniciativa popular");
   if (t==="PLE") return ex("§ 1º, IV","Proposta de ação legislativa");
-  if (x.rel.some(r=>/originada de|originou-se d/i.test(r[0]) && /^(PLE|REI)\b/.test(r[1]))) return ex("§ 1º, IV","Originada de proposta de ação legislativa");
+  const origem = x.rel.find(r=>/origin/i.test(r[0]) && !/^deu origem/i.test(r[0]) && /^(PLE|REI)$/.test(tipoDe(r[1])));
+  if (origem) return ex("§ 1º, IV", (tipoDe(origem[1])==="REI" ? "Originada de relatório de evento institucional" : "Originada de proposta de ação legislativa")+" ("+parseId(origem[1])+")");
   if (aut.some(a=>a.tipo==="Comissão" && ehTemporaria(a.nome))) return {d:"NÃO", m:"Autoria de comissão temporária", r:"DNP 26, 3"};
   if (/diretrizes (para a elabora|or[cç]ament)|lei or[cç]ament[aá]ria anual|estima as receitas e fixa as despesas|plano plurianual|ppag/i.test(x.em) && aut.some(a=>/governador/i.test(a.tipo+a.nome)))
     return ex("§ 1º, II","LDO, LOA ou PPAG");
@@ -236,7 +237,17 @@ function avaliar(x){
 
 /* ---------- Junta portal e Silegis ---------- */
 const chave = (t,n,a) => `${String(t).replace(/\.$/,"")} ${n} ${a}`;
-function parseId(s){ const m=String(s).match(/^([A-Z]{2,4})\.?\s*(?:n[ºo°]\s*)?(\d+)\s*\/\s*(\d{4})/); return m ? chave(m[1],+m[2],+m[3]) : null; }
+// O Silegis escreve as relações de dois jeitos: "RQN 123/2026" ou "Projeto de Lei nº 1.128/2003"
+const NOMES = [["proposta de emenda a constituicao","PEC"],["projeto de lei complementar","PLC"],["projeto de lei","PL"],["projeto de lei ordinaria","PL"],["projeto de resolucao","PRE"],["proposta de acao legislativa","PLE"],["relatorio de evento institucional","REI"],["requerimento de comissao","RQC"],["requerimento em comissao","RQC"],["requerimento ordinario","RQO"],["requerimento em plenario","RQN"],["requerimento","RQN"],["mensagem","MSG"],["veto","VET"],["oficio","OFI"],["indicacao","IND"],["representacao","RPR"],["representacao de deputado","RPR"],["requerimento sem numero","RQS"],["oficio do tribunal de contas","OTC"],["oficio do tribunal de justica","OTJ"],["oficio da procuradoria-geral de justica","OPJ"],["oficio do governador do estado","OFC"]];
+function parseId(s){
+  s = String(s).trim();
+  let m = s.match(/^([A-Z]{2,4})\.?\s*(?:n[ºo°]\s*)?([\d.]+)\s*\/\s*(\d{4})/);
+  if (m) return chave(m[1], +m[2].replace(/\./g,""), +m[3]);
+  m = s.match(/^(.+?)\s+n[ºo°]\.?\s*([\d.]+)\s*\/\s*(\d{4})/i);
+  if (m){ const nm = norm(m[1]); const hit = NOMES.find(([k])=>k===nm); if (hit) return chave(hit[1], +m[2].replace(/\./g,""), +m[3]); }
+  return null;
+}
+const tipoDe = s => { const k = parseId(s); return k ? k.split(" ")[0] : ""; };
 function montar(){
   const P = new Map(), S = new Map();
   for (const x of DADOS.portal.itens||[]) P.set(chave(x.t,x.n,x.a), x);
@@ -266,11 +277,11 @@ function reavaliar(){
   montarReeleitos();
   for (const x of ITENS){ const r = avaliar(x); x.auto = r; }
   // anexação: anexada que fica com principal que arquiva (DNP 26, item 2) ou o contrário
+  // (a anexada que arquiva junto de principal que fica é o caso comum: arquiva normalmente, como na 19ª)
   for (const x of ITENS){
     x.ver = "";
     for (const pk of x.anexadaA){ const p = POR_CHAVE.get(pk); if (!p) continue;
-      if (p.auto.d==="SIM" && x.auto.d==="NÃO") x.ver = `Anexada a ${pk}, que arquiva: segue tramitando (DNP 26, 2)`;
-      else if (p.auto.d==="NÃO" && x.auto.d==="SIM") x.ver = `Anexada a ${pk}, que não arquiva`;
+      if (p.auto.d==="SIM" && x.auto.d==="NÃO") x.ver = `Anexada a ${pk}, que arquiva: segue tramitando do ponto da anexação (DNP 26, 2)`;
     }
     const man = marca(x.k,"decisao");
     x.dec = man ? {d:man, m:"Decisão manual", r:"manual", man:true} : (x.ver ? {d:"VERIFICAR", m:x.ver, r:x.auto.r, base:x.auto} : x.auto);
@@ -315,7 +326,7 @@ const COLS = [
   {id:"loc", h:"Local", w:200, v:x=>x.loc, html:x=>`<span title="${esc(x.loc)}">${esc(x.loc)}</span>`},
   {id:"anx", h:"Anexação", w:150, v:x=>x.anexadaA.length?"Anexada a "+x.anexadaA.join(", "):(x.anexos.length?x.anexos.length+" anexada"+(x.anexos.length>1?"s":""):""), html:x=> x.anexadaA.length?`<span class="mut">à</span> ${esc(x.anexadaA.join(", "))}`:(x.anexos.length?`<span class="mut" title="${esc(x.anexos.join(", "))}">${x.anexos.length} anexada${x.anexos.length>1?"s":""}</span>`:""), fv:x=>x.anexadaA.length?"Anexada":(x.anexos.length?"Tem anexadas":"Sem anexação")},
   {id:"ano", h:"Ano", w:58, v:x=>String(x.a), html:x=>`<span class="mut">${x.a}</span>`},
-  {id:"cruz", h:"Portal × Silegis", w:128, v:x=>x.cruz, html:x=>`<span class="${x.cruz==="OK"?"x-ok":/^Só/.test(x.cruz)?"x-so":"x-dif"}" title="${esc(x.cruz==="Situação ≠"?("Portal: "+x.sitP+" | Silegis: "+x.sitS):x.cruz)}">${x.cruz==="OK"?"✓ confere":esc(x.cruz)}</span>`},
+  {id:"cruz", h:"Portal × Silegis", w:150, v:x=>x.cruz, html:x=>`<span class="${x.cruz==="OK"?"x-ok":/^Só/.test(x.cruz)?"x-so":"x-dif"}" title="${esc(x.cruz==="Situação ≠"?("Portal: "+x.sitP+" | Silegis: "+x.sitS):x.cruz)}">${x.cruz==="OK"?"✓ confere":esc(x.cruz)}</span>`},
   {id:"imp", h:"Implantação", w:112, v:x=>quemCell(x,"imp")||"(pendente)", html:x=>quemCell(x,"imp")||`<span class="ph">—</span>`, ed:"imp"},
   {id:"conf", h:"Conferência", w:112, v:x=>quemCell(x,"conf")||"(pendente)", html:x=>quemCell(x,"conf")||`<span class="ph">—</span>`, ed:"conf"},
   {id:"rec", h:"Recolhido?", w:118, v:x=>marca(x.k,"rec")||"(vazio)", html:x=>marca(x.k,"rec")||`<span class="ph">—</span>`, ed:"rec"},
@@ -483,7 +494,7 @@ function renderResumo(){
           <li><b>Requerimentos</b> arquivam mesmo quando o autor foi reeleito (§ 1º, I).</li>
           <li><b>PEC</b> arquiva se os autores reeleitos forem menos de 1/3 da Assembleia, ou seja, menos de 26 (DNP 26, 1).</li>
           <li><b>§ 2º:</b> as exceções dos incisos I a IV arquivam se a proposição foi recebida até a 18ª Legislatura (até 31/01/2019).</li>
-          <li><b>Verificar:</b> anexada cujo destino difere da principal (DNP 26, 2). A decisão pode ser marcada à mão na coluna “Arquiva?”.</li></ul></div>
+          <li><b>Verificar:</b> anexada que não arquiva presa a uma principal que arquiva; ela continua tramitando do ponto em que estava ao ser anexada (DNP 26, 2). A decisão pode ser marcada à mão na coluna “Arquiva?”.</li></ul></div>
         <div class="box"><h3>Fontes</h3>
           <p>Portal (dados abertos): <b>${(DADOS.portal.total||0).toLocaleString("pt-BR")}</b> proposições · atualizado ${fmtDH(DADOS.portal.atualizado)} <button class="btn" id="btnPortal" style="margin-left:6px">Atualizar agora</button></p>
           <p>Silegis: <b>${(DADOS.silegis.total||0).toLocaleString("pt-BR")}</b> proposições · atualizado ${fmtDH(DADOS.silegis.atualizado)}${DADOS.silegis.quem?" por "+esc(DADOS.silegis.quem):""}</p>
