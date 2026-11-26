@@ -95,6 +95,9 @@ td.ed.mine{background:#f1f8f4}
 .leg .c-pk{background:#c9daf8}.leg .c-aut{background:#f4cccc}.leg .c-old{background:#f9d5ae}.leg .c-sit{background:#fce5cd}.leg .c-anx{background:#d9ead3}.leg .c-blk{background:#4a4a4a}
 @media (max-width:1100px){.leg{display:none}}
 .mut{color:var(--muted)}
+.g.agd td.wrap{white-space:normal;height:auto;padding-top:4px;padding-bottom:4px;line-height:1.5}
+.g.agd .ax{display:inline-block;font-family:var(--f-mono);font-size:11px;font-weight:600;background:rgba(255,255,255,.55);border:1px solid #b7d3ac;border-radius:4px;padding:0 5px;margin:1px 0}
+.g.agd td.ed.done{color:var(--green);font-family:var(--f-body);font-weight:600;font-size:12px}
 .empty{padding:60px 20px;text-align:center;color:var(--muted)}
 /* Abas da planilha */
 .tabs{display:flex;align-items:stretch;gap:2px;background:#ebe8e0;border-top:1px solid var(--line);padding:0 8px;overflow-x:auto;flex:none;scrollbar-width:thin}
@@ -185,7 +188,7 @@ const EQUIPE = ["ALINE","ANDRÉ","DIOGO","KÁTIA","LEO","SAMARA"];
 const REELEITOS_BASE = ["Bruno Engler","Beatriz Cerqueira","Eduardo Azevedo","Lud Falcão","Macaé Evaristo","Antonio Carlos Arantes","Neilando Pimenta","Elismar Prado","Chiara Biondini","Enes Cândido","Sargento Rodrigues","João Magalhães","Doorgal Andrada","Duarte Bechir","Grego da Fundação","Gustavo Valadares","Adriano Alvarenga","Lucas Lasmar","Maria Clara Marra","Noraldino Júnior","Leninha","Rodrigo Lopes","Gil Pereira","Delegado Christiano Xavier","Betinho Pinto Coelho","Mauro Tramonte","Nayara Rocha","Ulysses Gomes","Carlos Henrique","Ana Paula Siqueira","Carol Caram","Raul Belém","Cristiano Silveira","Tito Torres","Delegada Sheila","Ricardo Campos","Zé Guilherme","Dr. Maurício","Alê Portela","Zé Laviola","Vitório Júnior","Marquinho Lemos","Betão","Andréia de Jesus","Gustavo Santana","Leleco Pimentel","Roberto Andrade","Doutor Jean Freire","Marli Ribeiro","Luizinho","Mário Henrique Caixa","Coronel Henrique","Amanda Teixeira Dias"];
 const ABAS = [
   {id:"RES", nome:"#", c:"#123b36"},
-  {id:"VER", nome:"VERIFICAR", c:"#8a5a1c"},
+  {id:"VER", nome:"AGDPR", c:"#8a5a1c"},
   {id:"PL", c:"#3c78d8"},{id:"PLC", c:"#4a86e8"},{id:"PEC", c:"#4a86e8"},{id:"PRE", c:"#4a86e8"},
   {id:"RQN", c:"#4a86e8"},{id:"RQC", c:"#4a86e8"},{id:"RQO", c:"#4a86e8"},
   {id:"MSG", c:"#3d85c6"},{id:"IND", c:"#3d85c6"},{id:"OFI", c:"#4a86e8"},{id:"RPR", c:"#4a86e8"},{id:"PLE", c:"#4a86e8"},{id:"OTC", c:"#4a86e8"},
@@ -333,12 +336,12 @@ async function gravar(k,c,v){
 /* ---------- Colunas ---------- */
 const silegisURL = x => "https://silegis.almg.gov.br/silegismg/#/processos?sintaxe=LUCENE_EXTENDIDO&pesquisa=" + encodeURIComponent(`identificadorProposicao.proposicaoTipo:"${x.t}" AND identificadorProposicao.proposicaoNumero:"${x.n}" AND identificadorProposicao.proposicaoAno:"${x.a}"`);
 const portalURL = x => `https://www.almg.gov.br/projetos-de-lei/${x.t}/${x.n}/${x.a}`;
-const pillDec = d => `<span class="pill ${d.d==="SIM"?"p-sim":d.d==="NÃO"?"p-nao":"p-ver"}${d.man?" p-man":""}">${d.d==="SIM"?"ARQUIVA":d.d==="NÃO"?"NÃO ARQUIVA":"VERIFICAR"}</span>`;
+const pillDec = d => `<span class="pill ${d.d==="SIM"?"p-sim":d.d==="NÃO"?"p-nao":"p-ver"}${d.man?" p-man":""}">${d.d==="SIM"?"ARQUIVA":d.d==="NÃO"?"NÃO ARQUIVA":"AGDPR"}</span>`;
 const autTxt = x => x.aut.map(a=>a.nome.replace(/^Deputad[oa] /,"Dep. ")).join("; ");
 const quemCell = (x,c) => { const o=marcaObj(x.k,c); return o ? o.valor : ""; };
 const COLS = [
   {id:"pk", h:"Proposição", w:150, v:x=>x.k, sk:x=>x.t.padEnd(4," ")+String(x.a).padStart(4,"0")+String(x.n).padStart(6,"0"), html:x=>`${esc(x.k)}<span class="lk"><a href="${silegisURL(x)}" target="_blank" rel="noopener" title="Abrir no Silegis"><img src="https://silegis.almg.gov.br/silegismg/favicon.ico" alt="S" onerror="this.replaceWith('S')"></a><a href="${portalURL(x)}" target="_blank" rel="noopener" title="Abrir no portal da ALMG"><img src="https://www.almg.gov.br/favicon.ico" alt="A" onerror="this.replaceWith('A')"></a></span>`, filt:false},
-  {id:"dec", h:"Arquiva?", w:118, v:x=>x.dec.d==="SIM"?"ARQUIVA":x.dec.d==="NÃO"?"NÃO ARQUIVA":"VERIFICAR", html:x=>pillDec(x.dec), ed:"decisao"},
+  {id:"dec", h:"Arquiva?", w:118, v:x=>x.dec.d==="SIM"?"ARQUIVA":x.dec.d==="NÃO"?"NÃO ARQUIVA":"AGDPR", html:x=>pillDec(x.dec), ed:"decisao"},
   {id:"mot", h:"Fundamento", w:300, v:x=>x.dec.m, html:x=>`<span title="${esc(x.dec.m+" · "+x.dec.r)}">${esc(x.dec.m)}</span>`, filt:false},
   {id:"aut", h:"Autoria", w:230, cls:x=> /§ 2º/.test(x.dec.r)||/§ 2º/.test(x.dec.m) ? "c-old" : (!x.aut.length ? "c-vaz" : (!x.aut.some(a=>a.tipo==="Deputado"&&REEL.has(norm(a.nome))) ? "c-aut" : "")), v:x=>autTxt(x), html:x=>`<span title="${esc(autTxt(x))}">${esc(autTxt(x))}</span>`, fv:x=>x.aut.map(a=>a.nome.replace(/^Deputad[oa] /,"Dep. "))},
   {id:"sit", h:"Situação", w:230, cls:()=>"c-sit", v:x=>x.sit, html:x=>`<span title="${esc(x.sit)}">${esc(x.sit)}</span>`},
@@ -456,8 +459,10 @@ function popEditor(td, x, campo){
     html = `<h4>Recolhido pelo Arquivo?</h4>${["SIM","DESARQUIVADO","NÃO"].map(v=>`<button class="opt${atual===v?" cur":""}" data-v="${v}">${v}</button>`).join("")}<button class="opt" data-v="" style="color:var(--red)">Limpar</button>${rodape}`;
   } else if (campo==="decisao"){
     html = `<h4>Decisão</h4><div class="mut" style="font-size:11.5px;margin:0 4px 6px">Automático: ${esc(x.auto.d==="SIM"?"arquiva":"não arquiva")} — ${esc(x.auto.m)}${x.ver?"<br>⚠ "+esc(x.ver):""}</div>${[["","Automático (regra)"],["SIM","Arquiva"],["NÃO","Não arquiva"]].map(([v,l])=>`<button class="opt${atual===v?" cur":""}" data-v="${v}">${l}</button>`).join("")}${rodape}`;
+  } else if (campo==="agdpr"){
+    html = `<h4>Decisão da Presidência</h4>${["","Desanexar: anexadas seguem tramitando","Reanexar a proposição semelhante","Arquivar todas"].map(v=>`<button class="opt${atual===v?" cur":""}" data-v="${esc(v)}">${v||"<span class=mut>Aguardando</span>"}</button>`).join("")}${rodape}`;
   } else if (campo==="obs"){
-    html = `<h4>Observação · ${esc(x.k)}</h4><textarea>${esc(atual)}</textarea><div class="row"><button class="btn" data-a="cancel">Cancelar</button><button class="btn pri" data-a="save">Salvar</button></div>${rodape}`;
+    html = `<h4>Observação · ${esc(x.k.replace(/^AGDPR:/,""))}</h4><textarea>${esc(atual)}</textarea><div class="row"><button class="btn" data-a="cancel">Cancelar</button><button class="btn pri" data-a="save">Salvar</button></div>${rodape}`;
   }
   const p = abrirPop(td, html);
   const salvar = async v => { fecharPop(); const ok = await gravar(x.k,campo,v); if (campo==="decisao") reavaliar(); renderGrade(); if(ok) toast("Salvo"); };
@@ -469,7 +474,7 @@ function popEditor(td, x, campo){
 }
 $("#sheet").addEventListener("click", e=>{
   const fb = e.target.closest(".fbtn"); if (fb){ e.stopPropagation(); return popFiltro(fb, fb.dataset.f); }
-  const td = e.target.closest("td.ed"); if (td){ const k=td.parentElement.dataset.k; const x=POR_CHAVE.get(k); if(x) popEditor(td,x,td.dataset.ed); return; }
+  const td = e.target.closest("td.ed"); if (td){ const k=td.parentElement.dataset.k; const x=POR_CHAVE.get(k) || (k&&k.startsWith("AGDPR:") ? {k} : null); if(x) popEditor(td,x,td.dataset.ed); return; }
   const dep = e.target.closest("[data-dep]"); if (dep) return popDep(dep, dep.dataset.dep);
   const go = e.target.closest("[data-go]"); if (go){ irPara(go.dataset.go, go.dataset.farq||""); }
 });
@@ -499,12 +504,12 @@ function renderResumo(){
     <p class="sub">Proposições que vão para o arquivo em 31/01/2027, pela regra do art. 180 do Regimento Interno e da DNP 26/2018. Das ${ITENS.length.toLocaleString("pt-BR")} em tramitação, ${fica.toLocaleString("pt-BR")} continuam na próxima legislatura e não entram na lista.</p>
     <div class="cards">
       <div class="kpi red"><div class="v">${tot.arq.toLocaleString("pt-BR")}</div><div class="l">A arquivar</div></div>
-      <div class="kpi amber"><div class="v">${tot.ver.toLocaleString("pt-BR")}</div><div class="l">A verificar</div></div>
+      <div class="kpi amber"><div class="v">${tot.ver.toLocaleString("pt-BR")}</div><div class="l">AGDPR · ${gruposAgdpr().length} principais</div></div>
       <div class="kpi"><div class="v">${pct(tot.imp,tot.arq)}%</div><div class="l">Implantados (${tot.imp.toLocaleString("pt-BR")})</div></div>
       <div class="kpi"><div class="v">${pct(tot.conf,tot.arq)}%</div><div class="l">Conferidos (${tot.conf.toLocaleString("pt-BR")})</div></div>
       <div class="kpi green"><div class="v">${pct(tot.rec,tot.arq)}%</div><div class="l">Recolhidos (${tot.rec.toLocaleString("pt-BR")})</div></div>
     </div>
-    <table class="s tipos"><thead><tr><th>Tipo</th><th>A arquivar</th><th>Verificar</th><th>Implantados</th><th>Conferidos</th><th>Recolhidos</th><th style="width:140px">Progresso</th></tr></thead><tbody>
+    <table class="s tipos"><thead><tr><th>Tipo</th><th>A arquivar</th><th>AGDPR</th><th>Implantados</th><th>Conferidos</th><th>Recolhidos</th><th style="width:140px">Progresso</th></tr></thead><tbody>
       ${ordem.map(id=>{ const l=linha(BASE.filter(x=>x.aba===id)); if(!l.n) return ""; return `<tr><td><a data-go="${id}">${id}</a></td><td><a data-go="${id}">${l.arq.toLocaleString("pt-BR")}</a></td><td>${l.ver?`<a data-go="VER">${l.ver}</a>`:0}</td><td>${l.imp}</td><td>${l.conf}</td><td>${l.rec}</td><td><div class="bar2"><i style="width:${pct(l.imp,l.arq)}%"></i></div></td></tr>`; }).join("")}
       <tr class="tot"><td>TOTAL</td><td>${tot.arq.toLocaleString("pt-BR")}</td><td>${tot.ver}</td><td>${tot.imp}</td><td>${tot.conf}</td><td>${tot.rec}</td><td><div class="bar2"><i style="width:${pct(tot.imp,tot.arq)}%"></i></div></td></tr>
     </tbody></table>
@@ -528,7 +533,7 @@ function renderResumo(){
           <li><b>Requerimentos</b> arquivam mesmo quando o autor foi reeleito (§ 1º, I). <b>RQC</b> não entram: desde 2015 nenhum foi arquivado no fim da legislatura (0 em 2019 e 0 em 2023).</li>
           <li><b>PEC</b> arquiva se os autores reeleitos forem menos de 1/3 da Assembleia, ou seja, menos de 26 (DNP 26, 1).</li>
           <li><b>§ 2º:</b> as exceções dos incisos I a IV arquivam se a proposição foi recebida até a 18ª Legislatura (até 31/01/2019).</li>
-          <li><b>Verificar:</b> anexada que não arquiva presa a uma principal que arquiva; ela continua tramitando do ponto em que estava ao ser anexada (DNP 26, 2). A decisão pode ser marcada à mão na coluna “Arquiva?”.</li></ul></div>
+          <li><b>AGDPR (aguardando decisão da Presidência):</b> principal que arquiva com anexadas que não arquivam; as anexadas continuam tramitando do ponto em que estavam ao serem anexadas, salvo se forem reanexadas a proposição semelhante (DNP 26, 2). A decisão é marcada na aba AGDPR.</li></ul></div>
         <div class="box"><h3>Legenda das cores</h3><ul class="lg">
           <li><i style="background:#c9daf8"></i><b>Proposição</b>: com os ícones do Silegis e do portal ao lado.</li>
           <li><i style="background:#f4cccc"></i><b>Autoria em vermelho</b>: nenhum autor foi reeleito. <span class="mut">Em branco: há autor reeleito (o requerimento arquiva mesmo assim).</span></li>
@@ -538,7 +543,7 @@ function renderResumo(){
           <li><i style="background:#d9ead3"></i><b>Anexação em verde</b>: anexada a outra ou com anexadas.</li>
           <li><i style="background:#4a4a4a"></i><b>Trecho escuro</b>: implantação marcada; Implantação, Conferência e Recolhido escurecem.</li>
           <li><i style="background:#7a1414"></i><b>Cabeçalho vinho</b>: colunas de trabalho da equipe (preenchidas no site).</li>
-          <li><span class="pill p-sim">ARQUIVA</span> <span class="pill p-ver">VERIFICAR</span> <span class="mut">Contorno tracejado: decisão marcada à mão.</span></li>
+          <li><span class="pill p-sim">ARQUIVA</span> <span class="pill p-ver">AGDPR</span> <span class="mut">Contorno tracejado: decisão marcada à mão.</span></li>
         </ul></div>
         <div class="box"><h3>Fontes</h3>
           <p>Portal (dados abertos): <b>${(DADOS.portal.total||0).toLocaleString("pt-BR")}</b> proposições · atualizado ${fmtDH(DADOS.portal.atualizado)} <button class="btn" id="btnPortal" style="margin-left:6px">Atualizar agora</button></p>
@@ -548,6 +553,28 @@ function renderResumo(){
       </div>
     </div></div>`;
   const bp = $("#btnPortal"); if (bp) bp.onclick = async ()=>{ bp.disabled=true; bp.textContent="Atualizando…"; try{ const r=await fetch(API+"/portal/atualizar",{method:"POST"}); const j=await r.json(); if(!r.ok) throw new Error(j.erro); toast(`Portal atualizado: ${j.total} proposições`); await carregar(); }catch(e){ toast("Falhou: "+(e.message||"erro")); bp.disabled=false; bp.textContent="Atualizar agora"; } };
+}
+/* AGDPR: uma linha por principal que arquiva, com as anexadas que seguem tramitando (DNP 26, item 2) */
+function gruposAgdpr(){
+  const m = new Map();
+  for (const x of ITENS) if (x.dec.d==="VERIFICAR" || (x.dec.man && x.ver)) for (const pk of x.anexadaA){ const p=POR_CHAVE.get(pk); if(!p) continue; if(!m.has(pk)) m.set(pk,{p, anx:[]}); m.get(pk).anx.push(x); }
+  return [...m.values()].sort((a,b)=> a.p.t.localeCompare(b.p.t) || a.p.a-b.p.a || a.p.n-b.p.n);
+}
+function renderAgdpr(){
+  const qq = norm(Q);
+  const G = gruposAgdpr().filter(g=>!qq || norm(g.p.k+" "+autTxt(g.p)+" "+g.anx.map(a=>a.k+" "+autTxt(a)).join(" ")+" "+marca("AGDPR:"+g.p.k,"obs")).includes(qq));
+  const ok = G.filter(g=>marca("AGDPR:"+g.p.k,"agdpr")).length;
+  $("#count").innerHTML = `<b>${G.length}</b> principais · <b>${G.reduce((s,g)=>s+g.anx.length,0)}</b> anexadas · <b>${ok}</b> com decisão`;
+  const lk = x => `<span class="lk"><a href="${silegisURL(x)}" target="_blank" rel="noopener" title="Abrir no Silegis"><img src="https://silegis.almg.gov.br/silegismg/favicon.ico" alt="S" onerror="this.replaceWith('S')"></a><a href="${portalURL(x)}" target="_blank" rel="noopener" title="Abrir no portal da ALMG"><img src="https://www.almg.gov.br/favicon.ico" alt="A" onerror="this.replaceWith('A')"></a></span>`;
+  const W=[46,220,150,250,330,260,210,220];
+  $("#sheet").innerHTML = `<table class="g agd" style="width:${W.reduce((a,b)=>a+b,0)}px"><colgroup>${W.map(w=>`<col style="width:${w}px">`).join("")}</colgroup>
+  <thead><tr class="letters"><th class="rn"></th>${"ABCDEFG".split("").map(l=>`<th>${l}</th>`).join("")}</tr>
+  <tr class="heads"><th class="rn">#</th><th>Autoria</th><th class="pk">Proposição</th><th>Por que arquiva</th><th>Anexadas que seguem</th><th>Autoria das anexadas</th><th class="hw">Decisão da Presidência</th><th class="hw">Obs.</th></tr></thead><tbody>
+  ${G.map((g,i)=>{ const k="AGDPR:"+g.p.k, d=marca(k,"agdpr"), ob=marca(k,"obs");
+    return `<tr data-k="${esc(k)}"><td class="rn">${i+1}</td><td class="c-aut" title="${esc(autTxt(g.p))}">${esc(autTxt(g.p))}</td><td class="pk">${esc(g.p.k)}${lk(g.p)}</td><td title="${esc(g.p.dec.m)}">${esc(g.p.dec.m)}</td>
+    <td class="c-anx wrap">${g.anx.map(a=>`<span class="ax">${esc(a.k)}</span>`).join(" ")}</td><td class="wrap mut">${esc([...new Set(g.anx.flatMap(a=>a.aut.map(u=>u.nome.replace(/^Deputad[oa] /,"Dep. "))))].join("; "))}</td>
+    <td class="ed${d?" done":""}" data-ed="agdpr">${d?esc(d):`<span class="ph">Aguardando</span>`}</td><td class="ed" data-ed="obs">${ob?esc(ob):`<span class="ph">…</span>`}</td></tr>`; }).join("")}
+  </tbody></table>${G.length?"":`<div class="empty">Nenhuma principal com esses filtros.</div>`}`;
 }
 function renderDep(){
   const qq = norm(Q);
@@ -564,7 +591,7 @@ function bookmarklet(){
 
 /* ---------- Abas e navegação ---------- */
 function renderAbas(){
-  const n = id => id==="VER" ? ITENS.filter(x=>x.dec.d==="VERIFICAR").length : id==="DIV" ? ITENS.filter(x=>naLista(x) && x.cruz!=="OK").length : id==="DEP" ? DEPS.length : id==="RES" ? "" : listaBase().filter(x=>x.aba===id).length;
+  const n = id => id==="VER" ? gruposAgdpr().length : id==="DIV" ? ITENS.filter(x=>naLista(x) && x.cruz!=="OK").length : id==="DEP" ? DEPS.length : id==="RES" ? "" : listaBase().filter(x=>x.aba===id).length;
   $("#tabs").innerHTML = ABAS.map(a=> a.gap ? `<span class="gap"></span>` : (a.id!=="RES"&&a.id!=="DEP"&&a.id!=="VER"&&a.id!=="DIV"&&!n(a.id)) ? "" :
     `<button class="tab${ABA===a.id?" on":""}" data-a="${a.id}" style="--c:${a.c}"><span class="dot"></span>${esc(a.nome||a.id)}${n(a.id)!==""?` <span class="n">${Number(n(a.id)).toLocaleString("pt-BR")}</span>`:""}</button>`).join("");
 }
@@ -592,9 +619,9 @@ $("#csv").addEventListener("click", ()=>{
   const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download=`arquivamento-${ABA}.csv`; a.click();
 });
 function render(){
-  document.querySelectorAll("#tools .seg, #tools .lbl, #csv, #leg").forEach(el=>el.style.display = (ABA==="RES"||ABA==="DEP") ? "none" : "");
+  document.querySelectorAll("#tools .seg, #tools .lbl, #csv, #leg").forEach(el=>el.style.display = (ABA==="RES"||ABA==="DEP"||ABA==="VER") ? "none" : "");
   renderAbas(); chips();
-  if (ABA==="RES") renderResumo(); else if (ABA==="DEP") renderDep(); else renderGrade();
+  if (ABA==="RES") renderResumo(); else if (ABA==="DEP") renderDep(); else if (ABA==="VER") renderAgdpr(); else renderGrade();
   const st = $("#status"); if (DADOS) st.innerHTML = `Portal <b>${fmtDH(DADOS.portal.atualizado)}</b> · Silegis <b>${fmtDH(DADOS.silegis.atualizado)}</b>`;
 }
 
