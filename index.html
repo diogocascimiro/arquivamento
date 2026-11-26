@@ -91,7 +91,7 @@ td.ed.mine{background:#f1f8f4}
 .g thead tr.heads th.hw{background:#7a1414;color:#fff;border-bottom-color:#5c0f0f} .g thead tr.heads th.hw .fbtn{color:#e8b4b4}
 .leg{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);flex-wrap:wrap}
 .leg i{width:11px;height:11px;border-radius:3px;border:1px solid rgba(0,0,0,.12);margin-left:7px}
-.leg i:first-child{margin-left:0}
+.leg>span{display:inline-flex;align-items:center;gap:5px;cursor:help} .leg>span:first-child i{margin-left:0}
 .leg .c-pk{background:#c9daf8}.leg .c-aut{background:#f4cccc}.leg .c-old{background:#f9d5ae}.leg .c-sit{background:#fce5cd}.leg .c-anx{background:#d9ead3}.leg .c-blk{background:#4a4a4a}
 @media (max-width:1100px){.leg{display:none}}
 .mut{color:var(--muted)}
@@ -141,6 +141,7 @@ table.s{border-collapse:collapse;width:100%;font-size:12.5px;margin-bottom:24px;
 .box h3{margin:0 0 8px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--green)}
 .box p,.box li{color:#3b4240;margin:4px 0}
 .box ul{margin:4px 0;padding-left:18px}
+.box ul.lg{list-style:none;padding-left:0} .box ul.lg li{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap} .box ul.lg i{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.15);flex:none;transform:translateY(1px)}
 .bm{display:inline-block;padding:6px 12px;border-radius:8px;background:var(--amber);color:#fff;text-decoration:none;font-weight:600;cursor:grab}
 .toast{position:fixed;left:50%;bottom:58px;transform:translateX(-50%);background:var(--green);color:#fff;padding:8px 14px;border-radius:9px;font-size:12.5px;z-index:60;box-shadow:0 10px 30px -10px rgba(0,0,0,.4);opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
@@ -165,7 +166,7 @@ table.s{border-collapse:collapse;width:100%;font-size:12.5px;margin-bottom:24px;
   <span class="lbl">Implantação</span>
   <div class="seg" id="fImp"><button data-v="" class="on">Todas</button><button data-v="pend">Pendentes</button><button data-v="feita">Feitas</button></div>
   <div class="chips" id="chips"></div>
-  <span class="leg" id="leg"><i class="c-pk"></i>Proposição<i class="c-aut"></i>Autor não reeleito<i class="c-old"></i>Recebida até 2018 (§ 2º)<i class="c-sit"></i>Situação e local<i class="c-anx"></i>Anexação<i class="c-blk"></i>Implantada</span>
+  <span class="leg" id="leg" title="Clique para ver a legenda completa"><span title="Coluna da proposição, com os links para o Silegis e o portal"><i class="c-pk"></i>Proposição</span><span title="Autoria: nenhum autor foi reeleito. Em branco: há autor reeleito (requerimento arquiva mesmo assim)"><i class="c-aut"></i>Autor não reeleito</span><span title="Só arquiva pelo § 2º do art. 180: recebida até a 18ª Legislatura (até 31/01/2019)"><i class="c-old"></i>Recebida até 2018 (§ 2º)</span><span title="Situação e local atuais da proposição"><i class="c-sit"></i>Situação e local</span><span title="Verde: anexada a outra ou com anexadas. Cinza: sem anexação"><i class="c-anx"></i>Anexação</span><span title="Implantação já marcada: Implantação, Conferência e Recolhido ficam escuros"><i class="c-blk"></i>Implantada</span></span>
   <span class="count" id="count"></span>
   <button class="btn" id="csv" title="Baixar a aba filtrada em CSV"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 19h16"/></svg>CSV</button>
 </div>
@@ -526,6 +527,17 @@ function renderResumo(){
           <li><b>PEC</b> arquiva se os autores reeleitos forem menos de 1/3 da Assembleia, ou seja, menos de 26 (DNP 26, 1).</li>
           <li><b>§ 2º:</b> as exceções dos incisos I a IV arquivam se a proposição foi recebida até a 18ª Legislatura (até 31/01/2019).</li>
           <li><b>Verificar:</b> anexada que não arquiva presa a uma principal que arquiva; ela continua tramitando do ponto em que estava ao ser anexada (DNP 26, 2). A decisão pode ser marcada à mão na coluna “Arquiva?”.</li></ul></div>
+        <div class="box"><h3>Legenda das cores</h3><ul class="lg">
+          <li><i style="background:#c9daf8"></i><b>Proposição</b>: com os ícones do Silegis e do portal ao lado.</li>
+          <li><i style="background:#f4cccc"></i><b>Autoria em vermelho</b>: nenhum autor foi reeleito. <span class="mut">Em branco: há autor reeleito (o requerimento arquiva mesmo assim).</span></li>
+          <li><i style="background:#f9d5ae"></i><b>Autoria em laranja</b>: arquiva só pelo § 2º, por ter sido recebida até 31/01/2019.</li>
+          <li><i style="background:#e3e3e3"></i><b>Cinza</b>: campo sem informação (sem autoria ou sem anexação).</li>
+          <li><i style="background:#fce5cd"></i><b>Situação e local</b>: onde a proposição está hoje.</li>
+          <li><i style="background:#d9ead3"></i><b>Anexação em verde</b>: anexada a outra ou com anexadas.</li>
+          <li><i style="background:#4a4a4a"></i><b>Trecho escuro</b>: implantação marcada; Implantação, Conferência e Recolhido escurecem.</li>
+          <li><i style="background:#7a1414"></i><b>Cabeçalho vinho</b>: colunas de trabalho da equipe (preenchidas no site).</li>
+          <li><span class="pill p-sim">ARQUIVA</span> <span class="pill p-ver">VERIFICAR</span> <span class="mut">Contorno tracejado: decisão marcada à mão.</span></li>
+        </ul></div>
         <div class="box"><h3>Fontes</h3>
           <p>Portal (dados abertos): <b>${(DADOS.portal.total||0).toLocaleString("pt-BR")}</b> proposições · atualizado ${fmtDH(DADOS.portal.atualizado)} <button class="btn" id="btnPortal" style="margin-left:6px">Atualizar agora</button></p>
           <p>Silegis: <b>${(DADOS.silegis.total||0).toLocaleString("pt-BR")}</b> proposições · atualizado ${fmtDH(DADOS.silegis.atualizado)}${DADOS.silegis.quem?" por "+esc(DADOS.silegis.quem):""}</p>
@@ -554,6 +566,7 @@ function renderAbas(){
   $("#tabs").innerHTML = ABAS.map(a=> a.gap ? `<span class="gap"></span>` : (a.id!=="RES"&&a.id!=="DEP"&&a.id!=="VER"&&a.id!=="DIV"&&!n(a.id)) ? "" :
     `<button class="tab${ABA===a.id?" on":""}" data-a="${a.id}" style="--c:${a.c}"><span class="dot"></span>${esc(a.nome||a.id)}${n(a.id)!==""?` <span class="n">${Number(n(a.id)).toLocaleString("pt-BR")}</span>`:""}</button>`).join("");
 }
+$("#leg").addEventListener("click", ()=>irPara("RES"));
 $("#tabs").addEventListener("click", e=>{ const b=e.target.closest(".tab"); if(b) irPara(b.dataset.a); });
 function irPara(aba, farq){
   ABA = aba; lsSet("arq:aba", aba); if (farq!==undefined){ FARQ=farq; segOn("#fArq",FARQ); }
