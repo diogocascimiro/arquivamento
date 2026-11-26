@@ -241,6 +241,8 @@ function avaliar(x){
   if (/diretrizes (para a elabora|or[cç]ament)|lei or[cç]ament[aá]ria anual|estima as receitas e fixa as despesas|plano plurianual|ppag/i.test(x.em) && aut.some(a=>/governador/i.test(a.tipo+a.nome)))
     return ex("§ 1º, II","LDO, LOA ou PPAG");
   if (/contas (do governador|anuais do governador|do tribunal de contas)|presta[cç][aã]o de contas do governador/i.test(x.em)) return {d:"NÃO", m:"Contas do Governador ou do TCE", r:"§ 1º, VI"};
+  // RQC: desde a Resolução 5.511/2015 nenhum foi arquivado no fim da legislatura (0 em 2019 e 0 em 2023, no Silegis)
+  if (t==="RQC") return {d:"NÃO", m:"RQC não é arquivado no fim da legislatura (prática desde 2019)", r:"prática"};
   if (/^RQ/.test(t)) return {d:"SIM", m: reel.length ? "Requerimento (arquiva mesmo de reeleito)" : "Requerimento", r:"§ 1º, I"};
   if (t==="PEC" && deps.length){
     if (reel.length >= 26) return ex("DNP 26, 1",`PEC com ${reel.length} autores reeleitos (≥ 1/3)`);
@@ -523,7 +525,7 @@ function renderResumo(){
         <div class="box"><h3>Regra aplicada</h3><ul>
           <li><b>Arquivam</b> todas as proposições em tramitação (art. 180), exceto as do § 1º.</li>
           <li><b>Não arquivam:</b> autoria de deputado reeleito (${REEL.size} reeleitos), inclusive autoria coletiva com algum reeleito; LDO, LOA e PPAG; iniciativa popular; proposta de ação legislativa e o que dela se originou; veto e matéria impugnada; contas do Governador e do TCE; autoria de comissão temporária (DNP 26, 3).</li>
-          <li><b>Requerimentos</b> arquivam mesmo quando o autor foi reeleito (§ 1º, I).</li>
+          <li><b>Requerimentos</b> arquivam mesmo quando o autor foi reeleito (§ 1º, I). <b>RQC</b> não entram: desde 2015 nenhum foi arquivado no fim da legislatura (0 em 2019 e 0 em 2023).</li>
           <li><b>PEC</b> arquiva se os autores reeleitos forem menos de 1/3 da Assembleia, ou seja, menos de 26 (DNP 26, 1).</li>
           <li><b>§ 2º:</b> as exceções dos incisos I a IV arquivam se a proposição foi recebida até a 18ª Legislatura (até 31/01/2019).</li>
           <li><b>Verificar:</b> anexada que não arquiva presa a uma principal que arquiva; ela continua tramitando do ponto em que estava ao ser anexada (DNP 26, 2). A decisão pode ser marcada à mão na coluna “Arquiva?”.</li></ul></div>
